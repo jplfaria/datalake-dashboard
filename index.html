@@ -18,7 +18,7 @@
             height: 100vh;
         }
         .sidebar {
-            width: 260px;
+            width: 280px;
             background: #fff;
             padding: 0;
             overflow-y: auto;
@@ -31,16 +31,11 @@
             padding: 12px 16px;
             font-size: 14px;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
-        .sidebar-section {
-            border-bottom: 1px solid #e0e0e0;
-        }
+        .sidebar-section { border-bottom: 1px solid #e0e0e0; }
         .sidebar-section-title {
             padding: 10px 16px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #666;
             text-transform: uppercase;
@@ -53,7 +48,9 @@
             justify-content: space-between;
         }
         .sidebar-section-title:hover { background: #f0f0f0; }
-        .sidebar-section-title .toggle-icon { font-size: 10px; color: #999; }
+        .sidebar-section-title .toggle-icon { font-size: 10px; color: #999; transition: transform 0.2s; }
+        .sidebar-section.collapsed .toggle-icon { transform: rotate(-90deg); }
+        .sidebar-section.collapsed > :not(.sidebar-section-title) { display: none !important; }
         .main {
             flex: 1;
             display: flex;
@@ -61,215 +58,380 @@
             overflow: hidden;
             background: #fff;
         }
-        .track-list {
-            padding: 8px 0;
+        /* Search */
+        .search-box {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e0e0e0;
         }
+        .search-box input {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 12px;
+            outline: none;
+        }
+        .search-box input:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+        .search-info { font-size: 10px; color: #888; margin-top: 4px; display: none; }
+        /* Track list */
+        .track-list { padding: 4px 0; }
         .track-item {
             display: flex;
             align-items: center;
-            padding: 8px 16px;
+            padding: 6px 12px;
             cursor: pointer;
             transition: background 0.15s;
             border-left: 3px solid transparent;
         }
         .track-item:hover { background: #f5f7fa; }
-        .track-item.active {
-            background: #eff6ff;
-            border-left-color: #2563eb;
-        }
+        .track-item.active { background: #eff6ff; border-left-color: #2563eb; }
         .track-item input[type="checkbox"] {
-            margin-right: 10px;
-            width: 16px;
-            height: 16px;
+            margin-right: 6px;
+            width: 14px;
+            height: 14px;
             accent-color: #2563eb;
             cursor: pointer;
         }
-        .track-item label {
-            flex: 1;
-            cursor: pointer;
-            font-size: 13px;
-            color: #444;
-        }
+        .track-item label { flex: 1; cursor: pointer; font-size: 12px; color: #444; }
         .track-item .sort-btn {
             background: #2563eb;
             border: none;
             color: white;
-            padding: 3px 8px;
+            padding: 2px 6px;
             border-radius: 3px;
             cursor: pointer;
-            font-size: 10px;
+            font-size: 9px;
             opacity: 0;
             transition: opacity 0.15s;
             font-weight: 500;
         }
         .track-item:hover .sort-btn { opacity: 1; }
         .track-item .sort-btn:hover { background: #1d4ed8; }
+        /* Analysis views */
+        .analysis-views { padding: 4px 8px; }
+        .analysis-view-btn {
+            display: flex; align-items: center; gap: 6px;
+            width: 100%; text-align: left;
+            background: #f3f4f6; border: 1px solid #d1d5db; color: #374151;
+            padding: 6px 10px; border-radius: 4px; cursor: pointer;
+            font-size: 11px; transition: all 0.15s; margin-bottom: 3px;
+        }
+        .analysis-view-btn:hover { background: #eff6ff; border-color: #93c5fd; }
+        .analysis-view-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+        .analysis-view-btn .av-name { font-weight: 600; }
+        .analysis-view-btn .av-desc { font-size: 10px; color: #6b7280; }
+        .analysis-view-btn.active .av-desc { color: #bfdbfe; }
+        .av-info-btn {
+            width: 12px; height: 12px; border-radius: 50%; border: 1px solid #d1d5db;
+            background: #f9fafb; color: #9ca3af; font-size: 8px; cursor: help;
+            display: inline-flex; align-items: center; justify-content: center;
+            flex-shrink: 0; margin-left: auto;
+        }
+        .av-info-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
+        .analysis-view-btn.active .av-info-btn { border-color: #93c5fd; background: #1d4ed8; color: white; }
+        /* Sort presets */
+        .sort-presets { padding: 6px 12px; display: flex; flex-wrap: wrap; gap: 4px; }
+        .sort-preset-wrapper { position: relative; display: inline-flex; align-items: center; }
+        .sort-preset-btn {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.15s;
+        }
+        .sort-preset-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
+        .sort-preset-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+        .sort-info-btn {
+            width: 12px; height: 12px; border-radius: 50%; border: 1px solid #d1d5db;
+            background: #f9fafb; color: #9ca3af; font-size: 8px; cursor: help;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-left: 2px; flex-shrink: 0;
+        }
+        .sort-info-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
+        /* Actions */
         .action-item {
             display: flex;
             align-items: center;
-            padding: 10px 16px;
+            padding: 8px 12px;
             cursor: pointer;
             transition: background 0.15s;
             color: #2563eb;
-            font-size: 13px;
+            font-size: 12px;
         }
         .action-item:hover { background: #eff6ff; }
-        .action-item .icon { margin-right: 8px; }
-        .heatmap-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            background: #fff;
+        .action-item .icon { margin-right: 6px; }
+        /* Stats bar */
+        .kpi-bar {
+            display: flex;
+            align-items: baseline;
+            gap: 0;
+            padding: 6px 12px;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: nowrap;
         }
-        #heatmap {
-            display: block;
-        }
+        .kpi-stat { display: inline-flex; align-items: baseline; gap: 4px; padding: 0 10px; }
+        .kpi-stat:not(:last-child) { border-right: 1px solid #475569; }
+        .kpi-value { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+        .kpi-label { font-size: 10px; color: #94a3b8; }
+        /* Toolbar */
         .toolbar {
             display: flex;
             align-items: center;
-            padding: 10px 16px;
+            padding: 8px 12px;
             background: #fff;
             border-bottom: 1px solid #e0e0e0;
-            gap: 16px;
+            gap: 12px;
         }
         .toolbar button {
             background: #f3f4f6;
             border: 1px solid #d1d5db;
             color: #374151;
-            padding: 6px 12px;
+            padding: 5px 10px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 500;
             transition: all 0.15s;
         }
-        .toolbar button:hover {
-            background: #2563eb;
-            color: white;
-            border-color: #2563eb;
-        }
-        .toolbar .zoom-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .toolbar .zoom-controls span {
-            font-size: 12px;
-            color: #666;
-            font-weight: 500;
-        }
-        .toolbar input[type="range"] {
-            width: 150px;
-            accent-color: #2563eb;
-        }
+        .toolbar button:hover { background: #2563eb; color: white; border-color: #2563eb; }
+        .toolbar .zoom-controls { display: flex; align-items: center; gap: 6px; }
+        .toolbar .zoom-controls span { font-size: 11px; color: #666; font-weight: 500; }
+        .toolbar input[type="range"] { width: 120px; accent-color: #2563eb; }
         .toolbar .info {
             margin-left: auto;
-            font-size: 12px;
-            color: #666;
-            background: #f3f4f6;
-            padding: 4px 10px;
-            border-radius: 4px;
-        }
-        .tooltip {
-            position: absolute;
-            background: #1f2937;
-            color: white;
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 12px;
-            pointer-events: none;
-            z-index: 1000;
-            max-width: 320px;
-            display: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            line-height: 1.5;
-        }
-        .tooltip .gene-id { color: #60a5fa; font-weight: bold; }
-        .tooltip .func { color: #9ca3af; font-style: italic; margin-top: 4px; display: block; }
-        .genome-selector {
-            height: 44px;
-            background: #fff;
-            border-top: 1px solid #e0e0e0;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        .genome-selector span {
-            font-size: 12px;
-            color: #666;
-            font-weight: 500;
-        }
-        .genome-selector input[type="range"] {
-            flex: 1;
-            accent-color: #2563eb;
-        }
-        #position-info {
             font-size: 11px;
             color: #666;
             background: #f3f4f6;
             padding: 3px 8px;
-            border-radius: 3px;
-            min-width: 120px;
-            text-align: center;
+            border-radius: 4px;
         }
-        .legend {
-            display: flex;
-            gap: 20px;
-            padding: 10px 16px;
-            background: #fafafa;
-            border-top: 1px solid #e0e0e0;
+        /* Heatmap */
+        .heatmap-container { flex: 1; position: relative; overflow: hidden; background: #fff; }
+        #heatmap { display: block; }
+        /* Tooltip */
+        .tooltip {
+            position: fixed;
+            background: #1f2937;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 6px;
             font-size: 11px;
-            color: #666;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 380px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            line-height: 1.5;
         }
-        .legend-item {
+        .tooltip .gene-id { color: #60a5fa; font-weight: bold; font-size: 12px; }
+        .tooltip .func { color: #9ca3af; font-style: italic; margin-top: 4px; display: block; }
+        .tooltip .tt-row { display: flex; justify-content: space-between; gap: 12px; }
+        .tooltip .tt-label { color: #9ca3af; }
+        .tooltip .tt-val { color: #e5e7eb; font-weight: 500; }
+        .tooltip .tt-highlight { color: #60a5fa; font-weight: 600; }
+        .tooltip .tt-section { margin-top: 6px; padding-top: 6px; border-top: 1px solid #374151; }
+        /* Gene Detail Panel */
+        .gene-detail-panel {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 340px;
+            background: #fff;
+            border-left: 1px solid #e0e0e0;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.08);
+            overflow-y: auto;
+            z-index: 500;
+            display: none;
+            font-size: 12px;
+        }
+        .gene-detail-panel.open { display: block; }
+        .gene-detail-header {
+            padding: 12px 16px;
+            background: #2563eb;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .gene-detail-header h3 { font-size: 14px; font-weight: 600; }
+        .gene-detail-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .gene-detail-body { padding: 12px 16px; }
+        .detail-section { margin-bottom: 14px; }
+        .detail-section-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6b7280;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .detail-row { display: flex; justify-content: space-between; padding: 3px 0; }
+        .detail-label { color: #6b7280; }
+        .detail-value { color: #1f2937; font-weight: 500; text-align: right; max-width: 200px; word-break: break-word; }
+        .detail-func {
+            background: #f3f4f6;
+            padding: 8px;
+            border-radius: 4px;
+            color: #374151;
+            font-style: italic;
+            line-height: 1.4;
+        }
+        .cons-bar {
+            display: inline-block;
+            width: 40px;
+            height: 10px;
+            border-radius: 2px;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        /* Genome selector */
+        .genome-selector {
+            height: 40px;
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            padding: 6px 12px;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 12px;
         }
+        .genome-selector span { font-size: 11px; color: #666; font-weight: 500; }
+        .genome-selector input[type="range"] { flex: 1; accent-color: #2563eb; }
+        #position-info {
+            font-size: 10px;
+            color: #666;
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            min-width: 110px;
+            text-align: center;
+        }
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 16px;
+            padding: 6px 12px;
+            background: #fafafa;
+            border-top: 1px solid #e0e0e0;
+            font-size: 10px;
+            color: #666;
+            flex-wrap: wrap;
+        }
+        .legend-item { display: flex; align-items: center; gap: 3px; }
         .legend-color {
-            width: 16px;
-            height: 12px;
+            width: 14px;
+            height: 10px;
             border-radius: 2px;
             border: 1px solid rgba(0,0,0,0.1);
         }
-        .legend-label {
-            font-weight: 500;
-            margin-right: 8px;
-            color: #444;
+        .legend-label { font-weight: 500; margin-right: 6px; color: #444; }
+        /* Track info tooltip */
+        .track-item .info-btn {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            color: #9ca3af;
+            font-size: 9px;
+            cursor: help;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 4px;
+            flex-shrink: 0;
         }
+        .track-item .info-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
+        .track-desc-tooltip {
+            position: fixed;
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            max-width: 360px;
+            z-index: 2000;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            line-height: 1.5;
+            display: none;
+        }
+        .track-desc-tooltip strong { color: #fff; }
+        .track-desc-tooltip .tt-section { margin-top: 6px; }
+        .track-desc-tooltip .tt-label { color: #93c5fd; font-weight: 600; display: block; margin-top: 5px; }
+        .track-desc-tooltip .tt-colors { display: flex; gap: 6px; margin-top: 3px; align-items: center; font-size: 10px; }
+        .track-desc-tooltip .tt-swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="sidebar">
-            <div class="sidebar-header">
-                <span>Genome Heatmap Viewer</span>
+            <div class="sidebar-header">Genome Heatmap Viewer</div>
+            <!-- Search -->
+            <div class="search-box">
+                <input type="text" id="gene-search" placeholder="Search genes (ID, function, KO)...">
+                <div class="search-info" id="search-info"></div>
             </div>
+            <!-- Analysis Views -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <span>Analysis Views</span>
+                    <span class="toggle-icon">&#9660;</span>
+                </div>
+                <div class="analysis-views" id="analysis-views"></div>
+            </div>
+            <!-- Data Tracks -->
             <div class="sidebar-section">
                 <div class="sidebar-section-title">
                     <span>Data Tracks</span>
-                    <span class="toggle-icon">▼</span>
+                    <span class="toggle-icon">&#9660;</span>
                 </div>
                 <div class="track-list" id="track-list"></div>
             </div>
+            <!-- Sort Presets -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <span>Sort By</span>
+                    <span class="toggle-icon">&#9660;</span>
+                </div>
+                <div class="sort-presets" id="sort-presets"></div>
+            </div>
+            <!-- Actions -->
             <div class="sidebar-section">
                 <div class="sidebar-section-title">
                     <span>Actions</span>
-                    <span class="toggle-icon">▼</span>
+                    <span class="toggle-icon">&#9660;</span>
                 </div>
                 <div class="action-item" onclick="resetSort()">
-                    <span class="icon">↺</span> Reset to genome order
+                    <span class="icon">&#8634;</span> Reset to genome order
                 </div>
                 <div class="action-item" onclick="selectAll()">
-                    <span class="icon">☑</span> Select all tracks
+                    <span class="icon">&#9745;</span> Select all tracks
                 </div>
                 <div class="action-item" onclick="deselectAll()">
-                    <span class="icon">☐</span> Deselect all tracks
+                    <span class="icon">&#9744;</span> Deselect all tracks
                 </div>
             </div>
         </div>
         <div class="main">
+            <!-- KPI Summary Bar -->
+            <div class="kpi-bar" id="kpi-bar"></div>
+            <!-- Toolbar -->
             <div class="toolbar">
                 <div class="zoom-controls">
                     <span>Zoom:</span>
@@ -278,11 +440,23 @@
                 </div>
                 <div class="info" id="info">Loading...</div>
             </div>
+            <!-- Heatmap -->
             <div class="heatmap-container">
                 <canvas id="heatmap"></canvas>
                 <div class="tooltip" id="tooltip"></div>
+                <div class="track-desc-tooltip" id="track-desc-tooltip"></div>
+                <!-- Gene Detail Panel -->
+                <div class="gene-detail-panel" id="gene-detail-panel">
+                    <div class="gene-detail-header">
+                        <h3 id="detail-title">Gene Details</h3>
+                        <button class="gene-detail-close" onclick="closeDetail()">&times;</button>
+                    </div>
+                    <div class="gene-detail-body" id="detail-body"></div>
+                </div>
             </div>
+            <!-- Legend -->
             <div class="legend" id="legend"></div>
+            <!-- Position -->
             <div class="genome-selector">
                 <span>Position:</span>
                 <input type="range" id="position-slider" min="0" max="100" value="0">
@@ -292,88 +466,268 @@
     </div>
 
     <script>
-    // Track definitions - based on Christopher's requirements
-    // Data array indices: [0:id, 1:fid, 2:length, 3:start, 4:strand, 5:conservation_frac, 6:pan_category,
-    //   7:function, 8:n_ko, 9:n_cog, 10:n_pfam, 11:n_go, 12:localization,
-    //   13:rast_cons, 14:ko_cons, 15:go_cons, 16:ec_cons, 17:avg_cons, 18:bakta_cons, 19:ec_avg_cons, 20:specificity]
+    // === DATA FIELD INDICES ===
+    const F = {
+        ID:0, FID:1, LENGTH:2, START:3, STRAND:4, CONS_FRAC:5, PAN_CAT:6,
+        FUNC:7, N_KO:8, N_COG:9, N_PFAM:10, N_GO:11, LOC:12,
+        RAST_CONS:13, KO_CONS:14, GO_CONS:15, EC_CONS:16,
+        AVG_CONS:17, BAKTA_CONS:18, EC_AVG_CONS:19, SPECIFICITY:20,
+        IS_HYPO:21, HAS_NAME:22, N_EC:23, AGREEMENT:24,
+        CLUSTER_SIZE:25, N_MODULES:26, EC_MAP_CONS:27, PROT_LEN:28
+    };
+
+    const LOC_NAMES = ['Cytoplasmic', 'CytoMembrane', 'Periplasmic', 'OuterMembrane', 'Extracellular', 'Unknown'];
+    const PAN_NAMES = ['Unknown', 'Accessory', 'Core'];
+    const AGREE_NAMES = ['Both Hypothetical', 'One Hypothetical', 'Disagree', 'Agree'];
+
+    // === TRACK DEFINITIONS ===
     const TRACKS = [
-        // === BASIC GENE INFO ===
-        { id: 'order', name: 'Gene Order', field: 0, type: 'sequential', enabled: true },
-        { id: 'length', name: 'Gene Length', field: 2, type: 'sequential', enabled: true },
-        { id: 'strand', name: 'Gene Direction', field: 4, type: 'binary', enabled: true },
-
-        // === PANGENOME ===
-        { id: 'conservation', name: 'Pangenome Conservation Fraction', field: 5, type: 'sequential', enabled: true },
-        { id: 'pan_category', name: 'Core/Accessory', field: 6, type: 'categorical', enabled: true, categories: ['Unknown', 'Accessory', 'Core'] },
-
-        // === CONSISTENCY SCORES (Function Consensus) ===
-        { id: 'avg_cons', name: 'Function Consensus (avg)', field: 17, type: 'consistency', enabled: true },
-        { id: 'rast_cons', name: 'RAST Consistency', field: 13, type: 'consistency', enabled: false },
-        { id: 'ko_cons', name: 'KO Consistency', field: 14, type: 'consistency', enabled: false },
-        { id: 'go_cons', name: 'GO Consistency', field: 15, type: 'consistency', enabled: false },
-        { id: 'ec_cons', name: 'EC Consistency', field: 16, type: 'consistency', enabled: false },
-        { id: 'bakta_cons', name: 'Bakta Consistency', field: 18, type: 'consistency', enabled: false },
-
-        // === ANNOTATION SPECIFICITY ===
-        { id: 'specificity', name: 'Annotation Specificity', field: 20, type: 'consistency', enabled: false },
-
-        // === ANNOTATION COUNTS ===
-        { id: 'n_ko', name: '# KEGG Terms', field: 8, type: 'sequential', enabled: false },
-        { id: 'n_cog', name: '# COG Terms', field: 9, type: 'sequential', enabled: false },
-        { id: 'n_pfam', name: '# Pfam Terms', field: 10, type: 'sequential', enabled: false },
-        { id: 'n_go', name: '# GO Terms', field: 11, type: 'sequential', enabled: false },
-
-        // === LOCALIZATION ===
-        { id: 'localization', name: 'Subcellular Localization', field: 12, type: 'categorical', enabled: false, categories: ['Cytoplasmic', 'CytoMembrane', 'Periplasmic', 'OuterMembrane', 'Extracellular', 'Unknown'] },
-
-        // === PLACEHOLDERS (data not yet available) ===
-        { id: 'neighborhood', name: 'Neighborhood Conservation*', field: -1, type: 'placeholder', enabled: false },
-        { id: 'flux_minimal', name: 'Flux (minimal media)*', field: -1, type: 'placeholder', enabled: false },
-        { id: 'rxn_class_min', name: 'Rxn Class (minimal)*', field: -1, type: 'placeholder', enabled: false },
-        { id: 'rxn_class_rich', name: 'Rxn Class (rich)*', field: -1, type: 'placeholder', enabled: false },
-        { id: 'n_phenotypes', name: '# Phenotypes*', field: -1, type: 'placeholder', enabled: false },
-        { id: 'n_fitness', name: '# Fitness Scores*', field: -1, type: 'placeholder', enabled: false },
+        { id: 'order', name: 'Gene Order', field: F.ID, type: 'sequential', enabled: true,
+          desc: '<strong>Gene Order (Position Index)</strong>' +
+            '<span class="tt-label">What it shows:</span>Each gene\'s position in the genome, ordered by its start coordinate on the chromosome.' +
+            '<span class="tt-label">How to read it:</span>Light = early in genome, dark = late in genome. In default "Genome Order" sort, this is a smooth gradient. When sorted by other tracks, breaks in the gradient reveal which genomic regions cluster together by function or conservation.' +
+            '<span class="tt-label">Data source:</span>Genomic start coordinate from the genome assembly (E. coli K-12 MG1655, GCF_000005845.2).' },
+        { id: 'strand', name: 'Gene Direction', field: F.STRAND, type: 'binary', enabled: true,
+          desc: '<strong>Gene Direction (DNA Strand)</strong>' +
+            '<span class="tt-label">What it shows:</span>Which DNA strand the gene is encoded on: forward (+, purple) or reverse (-, orange).' +
+            '<span class="tt-label">How to read it:</span>Consecutive blocks of the same color indicate genes transcribed in the same direction. These often form <em>operons</em> (co-transcribed gene clusters with related functions). Alternating colors suggest independent transcription units.' +
+            '<span class="tt-label">Biological insight:</span>In E. coli, ~53% of genes are on the forward strand. Long same-color blocks near the origin of replication reflect co-directional transcription bias.' },
+        { id: 'conservation', name: 'Pangenome Conservation', field: F.CONS_FRAC, type: 'sequential', enabled: true,
+          desc: '<strong>Pangenome Conservation Fraction</strong>' +
+            '<span class="tt-label">What it shows:</span>What fraction of the 35 reference E. coli genomes in the pangenome have a gene in the same orthologous cluster as this gene.' +
+            '<span class="tt-label">How it\'s computed:</span>The user genome is classified against a pre-built pangenome (built with mmseqs2 clustering). For each gene, we count how many of the 35 reference genomes have at least one gene in the same cluster, then divide by 35. For genes matching multiple clusters, we take the highest value.' +
+            '<span class="tt-label">How to read it:</span>1.0 (dark) = present in all 35 reference genomes (highly conserved). 0.0 (light) = no pangenome cluster match. Most core genes are >0.7.' +
+            '<span class="tt-label">Why it matters:</span>Highly conserved genes are typically essential or important. Low-conservation genes may be horizontally transferred, strain-specific, or phage-related.' },
+        { id: 'pan_category', name: 'Core/Accessory', field: F.PAN_CAT, type: 'categorical', enabled: true, categories: PAN_NAMES,
+          desc: '<strong>Core / Accessory / Unknown Classification</strong>' +
+            '<span class="tt-label">What it shows:</span>Whether a gene belongs to the pangenome core, accessory genome, or has no pangenome assignment.' +
+            '<div class="tt-colors"><span class="tt-swatch" style="background:#22c55e"></span> <strong>Core</strong> = conserved across nearly all reference genomes (high cluster member count)</div>' +
+            '<div class="tt-colors"><span class="tt-swatch" style="background:#f59e0b"></span> <strong>Accessory</strong> = present in some but not all reference genomes</div>' +
+            '<div class="tt-colors"><span class="tt-swatch" style="background:#9ca3af"></span> <strong>Unknown</strong> = no pangenome cluster hit (gray)</div>' +
+            '<span class="tt-label">How it\'s determined:</span>Based on the <em>is_core</em> flag from the pangenome pipeline. The threshold considers total cluster membership across 35 reference genomes.' +
+            '<span class="tt-label">In this genome:</span>3,626 core, 587 accessory, 404 unknown genes.' },
+        { id: 'avg_cons', name: 'Function Consensus (avg)', field: F.AVG_CONS, type: 'consistency', enabled: true,
+          desc: '<strong>Average Function Consistency Score</strong>' +
+            '<span class="tt-label">What it shows:</span>How well this gene\'s functional annotation agrees with other genes in the same pangenome cluster, averaged across all annotation sources (RAST, KO, GO, EC, Bakta).' +
+            '<span class="tt-label">How it\'s computed:</span>For each annotation source, the pipeline compares this gene\'s annotation to all other genes in the same cluster. If all genes share the same annotation, consistency = 1.0. If this gene has a unique annotation, consistency approaches 0. The average is taken across all available sources.' +
+            '<div class="tt-colors"><span class="tt-swatch" style="background:#22c55e"></span> 1.0 = all genes in cluster agree &nbsp; <span class="tt-swatch" style="background:#fbbf24"></span> 0.5 = mixed &nbsp; <span class="tt-swatch" style="background:#ef4444"></span> 0.0 = disagree &nbsp; <span class="tt-swatch" style="background:#e5e7eb"></span> N/A = no cluster</div>' +
+            '<span class="tt-label">Biological insight:</span>Low consistency (red) genes are especially interesting: they may have novel functions, incorrect annotations, or represent recently diverged genes.' },
+        { id: 'rast_cons', name: 'RAST Consistency', field: F.RAST_CONS, type: 'consistency', enabled: false,
+          desc: '<strong>RAST Function Consistency</strong>' +
+            '<span class="tt-label">What it shows:</span>Whether this gene\'s RAST function annotation matches the RAST annotations of other genes in the same pangenome cluster.' +
+            '<span class="tt-label">About RAST:</span>RAST (Rapid Annotation using Subsystem Technology) assigns functional roles based on sequence similarity to the SEED database. It provides human-readable function names (e.g., "Alcohol dehydrogenase").' +
+            '<span class="tt-label">How to interpret:</span>Green (1.0) = all cluster members share the same RAST function. Red (0.0) = this gene has a RAST function that no other cluster member shares. Gray = gene has no pangenome cluster assignment.' +
+            '<span class="tt-label">Tip:</span>Compare with Bakta consistency. If both are low, the gene may be genuinely ambiguous. If RAST is low but Bakta is high, annotation sources disagree.' },
+        { id: 'ko_cons', name: 'KO Consistency', field: F.KO_CONS, type: 'consistency', enabled: false,
+          desc: '<strong>KEGG Orthology Consistency</strong>' +
+            '<span class="tt-label">What it shows:</span>Whether this gene\'s KEGG Orthology (KO) assignment matches other genes in the same pangenome cluster.' +
+            '<span class="tt-label">About KO:</span>KEGG Orthologs are standardized functional gene identifiers (e.g., K00001 = alcohol dehydrogenase). They link genes to KEGG pathways, reactions, and modules. Not all genes receive a KO assignment.' +
+            '<span class="tt-label">Gray means:</span>Either no pangenome cluster, or no KO term assigned to this gene. Many genes (especially hypothetical proteins) lack KO assignments.' +
+            '<span class="tt-label">Tip:</span>Low KO consistency with high RAST consistency may indicate that the KEGG database classifies the function more finely than RAST.' },
+        { id: 'go_cons', name: 'GO Consistency', field: F.GO_CONS, type: 'consistency', enabled: false,
+          desc: '<strong>Gene Ontology Consistency</strong>' +
+            '<span class="tt-label">What it shows:</span>Whether this gene\'s GO (Gene Ontology) terms match those assigned to other genes in the same pangenome cluster.' +
+            '<span class="tt-label">About GO:</span>GO provides structured vocabulary for gene function across three domains: Molecular Function, Biological Process, and Cellular Component. GO terms are hierarchical (parent-child relationships).' +
+            '<span class="tt-label">How to interpret:</span>GO consistency tends to be higher than KO/EC consistency because GO terms are broader. A gene can have multiple GO terms, so consistency is computed across the full term set.' +
+            '<span class="tt-label">Gray means:</span>No pangenome cluster or no GO terms assigned.' },
+        { id: 'ec_cons', name: 'EC Consistency', field: F.EC_CONS, type: 'consistency', enabled: false,
+          desc: '<strong>EC Number Consistency</strong>' +
+            '<span class="tt-label">What it shows:</span>Whether this gene\'s Enzyme Commission (EC) number matches EC numbers of other genes in the same pangenome cluster.' +
+            '<span class="tt-label">About EC:</span>EC numbers classify enzymes by the reaction they catalyze (e.g., EC 1.1.1.1 = alcohol dehydrogenase). Only enzyme-coding genes receive EC numbers, so non-enzymatic genes will be gray.' +
+            '<span class="tt-label">How to interpret:</span>Green = enzymatic function is consistent across the cluster. Red = this gene\'s enzyme classification differs from cluster members. Gray = no EC number assigned or no pangenome cluster.' +
+            '<span class="tt-label">Correlation:</span>EC consistency should closely correlate with Bakta consistency for enzyme-coding genes, since both ultimately reflect enzymatic function.' },
+        { id: 'bakta_cons', name: 'Bakta Consistency', field: F.BAKTA_CONS, type: 'consistency', enabled: false,
+          desc: '<strong>Bakta Function Consistency</strong>' +
+            '<span class="tt-label">What it shows:</span>Whether this gene\'s Bakta annotation matches Bakta annotations of other genes in the same pangenome cluster.' +
+            '<span class="tt-label">About Bakta:</span>Bakta is a modern genome annotation tool that integrates multiple databases (UniProt, Pfam, COG, etc.) to produce standardized, high-quality annotations. It provides more consistent naming than RAST.' +
+            '<span class="tt-label">How to interpret:</span>Green = Bakta annotation is consistent across cluster. Red = Bakta disagrees with other members. Gray = no cluster assignment.' +
+            '<span class="tt-label">Tip:</span>Bakta consistency is a strong signal. When both RAST and Bakta are low, the gene likely has a genuinely unusual function for its cluster.' },
+        { id: 'specificity', name: 'Annotation Specificity', field: F.SPECIFICITY, type: 'consistency', enabled: false,
+          desc: '<strong>Annotation Specificity</strong>' +
+            '<span class="tt-label">What it shows:</span>How specific or unique this gene\'s functional annotation is within its pangenome cluster. Computed as 1/N where N = the number of distinct annotations seen across cluster members.' +
+            '<span class="tt-label">How to read it:</span>1.0 (green) = only one annotation exists in the entire cluster (highly specific). Low values (red) = many different annotations exist in the cluster (ambiguous). Gray = no cluster assignment.' +
+            '<span class="tt-label">Why it matters:</span>Low specificity suggests the cluster contains genes with diverse functions, possibly because the cluster is too broad, or the genes have diverged in function.' },
+        { id: 'n_ko', name: '# KEGG Terms', field: F.N_KO, type: 'sequential', enabled: false,
+          desc: '<strong># KEGG Orthology Terms</strong>' +
+            '<span class="tt-label">What it shows:</span>Number of KEGG Orthology (KO) identifiers assigned to this gene.' +
+            '<span class="tt-label">How to read it:</span>Light = 0 KO terms (uncharacterized). Dark = multiple KO terms. Most genes have 0 or 1 KO assignment. Genes with >1 may be multifunctional or have ambiguous classification.' +
+            '<span class="tt-label">Source:</span>KO assignments come from sequence similarity search against the KEGG database. KO links genes to pathways, modules, and reactions.' },
+        { id: 'n_cog', name: '# COG Terms', field: F.N_COG, type: 'sequential', enabled: false,
+          desc: '<strong># COG Terms</strong>' +
+            '<span class="tt-label">What it shows:</span>Number of COG (Clusters of Orthologous Groups) assignments for this gene.' +
+            '<span class="tt-label">About COG:</span>COG groups proteins into functional categories (e.g., J = Translation, K = Transcription, C = Energy production). COG provides a broad functional classification rather than specific enzyme activity.' +
+            '<span class="tt-label">How to read it:</span>Most genes have 0 or 1 COG. Genes with 0 may be hypothetical or strain-specific. Dark = multiple COG categories (multifunctional).' },
+        { id: 'n_pfam', name: '# Pfam Terms', field: F.N_PFAM, type: 'sequential', enabled: false,
+          desc: '<strong># Pfam Domains</strong>' +
+            '<span class="tt-label">What it shows:</span>Number of Pfam protein family domains identified in this gene\'s protein product.' +
+            '<span class="tt-label">About Pfam:</span>Pfam detects conserved protein domains using Hidden Markov Models (HMMs). A gene can have multiple domains (e.g., a kinase domain + regulatory domain). Domain count correlates with protein complexity.' +
+            '<span class="tt-label">How to read it:</span>0 = no recognized domains (often short or novel proteins). 1-2 = typical. >3 = complex multidomain protein.' },
+        { id: 'n_go', name: '# GO Terms', field: F.N_GO, type: 'sequential', enabled: false,
+          desc: '<strong># Gene Ontology Terms</strong>' +
+            '<span class="tt-label">What it shows:</span>Number of Gene Ontology (GO) terms assigned to this gene.' +
+            '<span class="tt-label">About GO:</span>GO terms describe Molecular Function, Biological Process, and Cellular Component. Genes typically receive multiple GO terms at different hierarchy levels. More terms generally means better characterized.' +
+            '<span class="tt-label">How to read it:</span>0 (light) = functionally uncharacterized. Higher counts (dark) = well-studied gene with many functional annotations. Well-characterized genes like essential enzymes often have 5-15+ GO terms.' },
+        { id: 'localization', name: 'Subcellular Localization', field: F.LOC, type: 'categorical', enabled: false, categories: LOC_NAMES,
+          desc: '<strong>Subcellular Localization (PSORTb)</strong>' +
+            '<span class="tt-label">What it shows:</span>Predicted subcellular location of the gene\'s protein product.' +
+            '<span class="tt-label">Categories:</span>Cytoplasmic (most common), Cytoplasmic Membrane, Periplasmic, Outer Membrane, Extracellular, Unknown.' +
+            '<span class="tt-label">About PSORTb:</span>PSORTb uses multiple methods (signal peptides, transmembrane helices, motifs) to predict where a protein localizes in a Gram-negative cell. "Unknown" means PSORTb could not confidently predict a location.' +
+            '<span class="tt-label">Biological insight:</span>Localization correlates with function: transporters are in membranes, metabolic enzymes in cytoplasm, secreted toxins are extracellular.' },
+        // === NEW TRACKS ===
+        { id: 'is_hypo', name: 'Hypothetical Protein', field: F.IS_HYPO, type: 'binary', enabled: false,
+          desc: '<strong>Hypothetical Protein Flag</strong>' +
+            '<span class="tt-label">What it shows:</span>Whether both annotation tools (RAST and Bakta) classify this gene as a hypothetical protein, meaning its function is unknown.' +
+            '<div class="tt-colors"><span class="tt-swatch" style="background:#6366f1"></span> <strong>Has function</strong> = at least one tool assigned a function &nbsp; <span class="tt-swatch" style="background:#f97316"></span> <strong>Hypothetical</strong> = both tools say hypothetical/unknown</div>' +
+            '<span class="tt-label">Why it matters:</span>102 genes in this genome are functionally dark (both RAST and Bakta say hypothetical). When these overlap with core pangenome genes, they represent high-priority characterization targets since they\'re conserved but uncharacterized.' +
+            '<span class="tt-label">Tip:</span>Combine with the Core/Accessory track. Hypothetical + Core = conserved gene with no known function, likely important.' },
+        { id: 'has_name', name: 'Has Gene Name', field: F.HAS_NAME, type: 'binary', enabled: false,
+          desc: '<strong>Has Official Gene Name</strong>' +
+            '<span class="tt-label">What it shows:</span>Whether this gene has an official gene name (e.g., dnaA, tssB, lacZ) as opposed to being identified only by a locus tag.' +
+            '<div class="tt-colors"><span class="tt-swatch" style="background:#6366f1"></span> <strong>Named</strong> = has official gene name &nbsp; <span class="tt-swatch" style="background:#f97316"></span> <strong>Unnamed</strong> = locus tag only</div>' +
+            '<span class="tt-label">Coverage:</span>3,955 of 4,617 genes (86%) have official names. Unnamed genes are less well-studied.' +
+            '<span class="tt-label">Source:</span>Gene names from Bakta annotation, which pulls from UniProt and RefSeq databases.' },
+        { id: 'n_ec', name: '# EC Numbers', field: F.N_EC, type: 'sequential', enabled: false,
+          desc: '<strong># Enzyme Commission (EC) Numbers</strong>' +
+            '<span class="tt-label">What it shows:</span>How many EC numbers are assigned to this gene. EC numbers classify enzymes by the chemical reaction they catalyze (e.g., EC 1.1.1.1 = alcohol dehydrogenase).' +
+            '<span class="tt-label">How to read it:</span>Light = 0 EC numbers (not an enzyme, or enzyme activity unknown). Dark = multiple EC numbers (multifunctional enzyme or enzyme with broad specificity). Most genes have 0 or 1.' +
+            '<span class="tt-label">Coverage:</span>1,876 genes (41%) have at least one EC number. Non-enzymatic proteins (transporters, regulators, structural) naturally have 0.' +
+            '<span class="tt-label">Source:</span>EC assignments from Bakta annotation pipeline.' },
+        { id: 'agreement', name: 'RAST/Bakta Agreement', field: F.AGREEMENT, type: 'categorical', enabled: false, categories: AGREE_NAMES,
+          desc: '<strong>RAST vs Bakta Annotation Agreement</strong>' +
+            '<span class="tt-label">What it shows:</span>Whether the two annotation tools (RAST and Bakta) agree on this gene\'s function.' +
+            '<div class="tt-colors"><span class="tt-swatch" style="background:#9ca3af"></span> Both Hypothetical &nbsp; <span class="tt-swatch" style="background:#f59e0b"></span> One Hypothetical &nbsp; <span class="tt-swatch" style="background:#22c55e"></span> Disagree &nbsp; <span class="tt-swatch" style="background:#3b82f6"></span> Agree</div>' +
+            '<span class="tt-label">How to interpret:</span>Only 328 genes have exact agreement between RAST and Bakta function strings. This is expected since RAST and Bakta use different naming conventions. "Disagree" does NOT mean the annotations are wrong; it often means the same function is described differently.' +
+            '<span class="tt-label">What matters:</span>"One Hypothetical" (285 genes) is the most interesting category: one tool found a function that the other missed. These may be recently characterized genes.' },
+        { id: 'cluster_size', name: 'Cluster Size', field: F.CLUSTER_SIZE, type: 'sequential', enabled: false,
+          desc: '<strong>Pangenome Cluster Size</strong>' +
+            '<span class="tt-label">What it shows:</span>Total number of gene members in this gene\'s pangenome cluster across all 35 reference genomes. For multi-cluster genes, the largest cluster is shown.' +
+            '<span class="tt-label">How to read it:</span>Light = small cluster (1-5 members, rare gene family). Dark = large cluster (100+ members, expanded gene family). Ranges from 1 to 774 in this dataset.' +
+            '<span class="tt-label">Different from conservation:</span>Conservation measures how many genomes have the gene. Cluster size measures total copies including paralogs. A cluster with 100 members in 35 genomes means ~3 copies per genome on average.' +
+            '<span class="tt-label">Biological insight:</span>Large clusters often represent gene families with many paralogs (e.g., ABC transporters, two-component systems). Single-member clusters are truly unique genes.' },
+        { id: 'n_modules', name: 'KEGG Module Hits', field: F.N_MODULES, type: 'sequential', enabled: false,
+          desc: '<strong>KEGG Module Participation</strong>' +
+            '<span class="tt-label">What it shows:</span>How many KEGG metabolic modules this gene participates in. KEGG modules are functional units representing metabolic pathways, structural complexes, or signaling pathways.' +
+            '<span class="tt-label">How to read it:</span>0 (light) = not in any active module. Higher (dark) = gene is part of multiple metabolic pathways (metabolic hub). Max is 9 in this genome.' +
+            '<span class="tt-label">Coverage:</span>252 genes (5.5%) participate in at least 1 of the 148 active KEGG modules. These are the metabolic backbone of the cell.' +
+            '<span class="tt-label">Biological insight:</span>Genes in many modules are central metabolic enzymes (glycolysis, TCA cycle, amino acid biosynthesis). They tend to be essential and highly conserved.' },
+        { id: 'ec_map_cons', name: 'EC Mapped Consistency', field: F.EC_MAP_CONS, type: 'consistency', enabled: false,
+          desc: '<strong>EC Mapped Consistency</strong>' +
+            '<span class="tt-label">What it shows:</span>Consistency of this gene\'s EC number assignment compared to other genes in the same pangenome cluster, using EC numbers derived from GO and KEGG mappings (not direct EC annotation).' +
+            '<span class="tt-label">How it differs from EC Consistency:</span>Regular EC Consistency uses directly annotated EC numbers. EC Mapped Consistency uses EC numbers inferred through GO term cross-references (oio:hasDbXref) and KEGG KO-to-EC mappings. These two often disagree (1,742 genes differ).' +
+            '<span class="tt-label">How to interpret:</span>When EC Consistency is low but EC Mapped is high (or vice versa), it means the mapping pathway matters. Green = mapped ECs agree across cluster. Red = disagree. Gray = no EC mapping or no cluster.' },
+        { id: 'prot_len', name: 'Protein Length', field: F.PROT_LEN, type: 'sequential', enabled: false,
+          desc: '<strong>Protein Length (amino acids)</strong>' +
+            '<span class="tt-label">What it shows:</span>Length of the predicted protein product in amino acids. Ranges from 29 to 2,358 aa in this genome (mean 311 aa).' +
+            '<span class="tt-label">How to read it:</span>Light = short protein (<100 aa). Dark = long protein (>500 aa). Very short proteins (<50 aa) may be fragments, small regulatory peptides, or annotation artifacts.' +
+            '<span class="tt-label">Biological insight:</span>Protein length loosely correlates with complexity. Multi-domain proteins are longer. Transporters and synthases tend to be large. Regulatory proteins and toxins can be very small.' },
+        { id: 'neighborhood', name: 'Neighborhood Conservation*', field: -1, type: 'placeholder', enabled: false,
+          desc: '<strong>Neighborhood Conservation* (Pending)</strong>' +
+            '<span class="tt-label">Planned feature:</span>Will show how conserved the genomic neighborhood (surrounding genes) is across the pangenome. High values mean the gene cluster arrangement is preserved across species.' +
+            '<span class="tt-label">Status:</span>Awaiting BERDL pipeline update to compute neighborhood conservation scores.' },
+        { id: 'flux_minimal', name: 'Flux (minimal media)*', field: -1, type: 'placeholder', enabled: false,
+          desc: '<strong>Metabolic Flux - Minimal Media* (Pending)</strong>' +
+            '<span class="tt-label">Planned feature:</span>Will show the predicted metabolic flux through each gene\'s reaction(s) in pyruvate minimal media conditions using Flux Balance Analysis (FBA) with a genome-scale metabolic model.' +
+            '<span class="tt-label">Status:</span>Requires FBA results from ModelSEED/KBase.' },
+        { id: 'rxn_class_min', name: 'Rxn Class (minimal)*', field: -1, type: 'placeholder', enabled: false,
+          desc: '<strong>Reaction Classification - Minimal Media* (Pending)</strong>' +
+            '<span class="tt-label">Planned feature:</span>FVA (Flux Variability Analysis) reaction classification in minimal media. Categories: Essential (always carries flux), Active (carries flux in optimal), Inactive (blocked), Variable.' +
+            '<span class="tt-label">Status:</span>Requires FVA results from metabolic modeling.' },
+        { id: 'rxn_class_rich', name: 'Rxn Class (rich)*', field: -1, type: 'placeholder', enabled: false,
+          desc: '<strong>Reaction Classification - Rich Media* (Pending)</strong>' +
+            '<span class="tt-label">Planned feature:</span>Same as minimal media reaction classification but under rich media conditions. Comparing minimal vs. rich reveals condition-dependent essential genes.' +
+            '<span class="tt-label">Status:</span>Requires FVA results from metabolic modeling.' },
+        { id: 'n_phenotypes', name: '# Phenotypes*', field: -1, type: 'placeholder', enabled: false,
+          desc: '<strong># Linked Phenotypes* (Pending)</strong>' +
+            '<span class="tt-label">Planned feature:</span>Number of phenotypes (growth/no-growth on specific media) that are linked to this gene through the metabolic model. High counts indicate genes involved in many metabolic pathways.' +
+            '<span class="tt-label">Status:</span>Requires gene-phenotype mapping via model analysis.' },
+        { id: 'n_fitness', name: '# Fitness Scores*', field: -1, type: 'placeholder', enabled: false,
+          desc: '<strong># Fitness Scores* (Pending)</strong>' +
+            '<span class="tt-label">Planned feature:</span>Number of experimental fitness scores above significance threshold from high-throughput mutant fitness assays (e.g., RB-TnSeq). Indicates how many conditions this gene affects growth in.' +
+            '<span class="tt-label">Status:</span>Requires integration with fitness.py pipeline.' },
     ];
 
-    // Color schemes - optimized for light background
+    // === SORT PRESETS ===
+    const SORT_PRESETS = [
+        { id: 'genome', name: 'Genome Order',
+          desc: '<strong>Genome Order (Default)</strong><span class="tt-label">What it does:</span>Sorts genes by their physical position on the chromosome (start coordinate). This is the natural gene order as found in the genome assembly.<span class="tt-label">When to use:</span>Default view. Use this to see the genome layout and identify operons (consecutive same-strand genes), genomic islands, and regional patterns.',
+          fn: (a, b, g) => g[a][F.START] - g[b][F.START] },
+        { id: 'conservation', name: 'Conservation',
+          desc: '<strong>Sort by Conservation (High \u2192 Low)</strong><span class="tt-label">What it does:</span>Sorts genes by pangenome conservation fraction (highest first). Genes present in all 35 reference genomes appear first; strain-specific genes appear last.<span class="tt-label">When to use:</span>Quickly identify the most conserved (essential) vs. strain-specific genes. The transition zone between core and accessory genes is especially interesting.',
+          fn: (a, b, g) => g[b][F.CONS_FRAC] - g[a][F.CONS_FRAC] },
+        { id: 'consistency', name: 'Consistency',
+          desc: '<strong>Sort by Avg Consistency (High \u2192 Low)</strong><span class="tt-label">What it does:</span>Sorts by average function consistency score (highest first). Genes where all annotation sources agree with cluster members appear first. N/A genes (no pangenome cluster) are pushed to the end.<span class="tt-label">When to use:</span>Identify well-annotated genes (green at top) vs. potentially mis-annotated or novel-function genes (red near bottom).',
+          fn: (a, b, g) => {
+            const va = g[a][F.AVG_CONS], vb = g[b][F.AVG_CONS];
+            if (va < 0 && vb < 0) return 0;
+            if (va < 0) return 1;
+            if (vb < 0) return -1;
+            return vb - va;
+        }},
+        { id: 'annotation_quality', name: 'Annotation Depth',
+          desc: '<strong>Sort by Annotation Depth (Most \u2192 Least)</strong><span class="tt-label">What it does:</span>Ranks genes by how many annotation sources have assigned terms: KO, COG, Pfam, GO, and RAST function. A gene with all 5 = depth 5 (best characterized). Hypothetical proteins typically have depth 0-1.<span class="tt-label">When to use:</span>Find the best-characterized genes (top) or identify under-annotated genes (bottom) that may need manual curation.',
+          fn: (a, b, g) => {
+            const depthA = (g[a][F.N_KO] > 0 ? 1 : 0) + (g[a][F.N_COG] > 0 ? 1 : 0) + (g[a][F.N_PFAM] > 0 ? 1 : 0) + (g[a][F.N_GO] > 0 ? 1 : 0) + (g[a][F.FUNC] ? 1 : 0);
+            const depthB = (g[b][F.N_KO] > 0 ? 1 : 0) + (g[b][F.N_COG] > 0 ? 1 : 0) + (g[b][F.N_PFAM] > 0 ? 1 : 0) + (g[b][F.N_GO] > 0 ? 1 : 0) + (g[b][F.FUNC] ? 1 : 0);
+            return depthB - depthA;
+        }},
+        { id: 'pan_status', name: 'Pangenome Status',
+          desc: '<strong>Sort by Pangenome Status</strong><span class="tt-label">What it does:</span>Groups genes by pangenome category: Core first, then Accessory, then Unknown. Within each group, genes are sorted by conservation fraction (highest first).<span class="tt-label">When to use:</span>Get a clean separation of core genome vs. accessory genome vs. unclassified genes. Useful for identifying the size and composition of each category.',
+          fn: (a, b, g) => {
+            const diff = g[b][F.PAN_CAT] - g[a][F.PAN_CAT];
+            return diff !== 0 ? diff : g[b][F.CONS_FRAC] - g[a][F.CONS_FRAC];
+        }},
+        { id: 'low_consistency', name: 'Lowest Consistency',
+          desc: '<strong>Sort by Consistency (Low \u2192 High)</strong><span class="tt-label">What it does:</span>Opposite of "Consistency" sort. Genes with the lowest consistency scores appear first. N/A genes are pushed to the end.<span class="tt-label">When to use:</span>Find the most interesting genes: those whose functional annotations DISAGREE with their pangenome cluster members. These are candidates for annotation errors, novel functions, or recent horizontal gene transfer.',
+          fn: (a, b, g) => {
+            const va = g[a][F.AVG_CONS], vb = g[b][F.AVG_CONS];
+            if (va < 0 && vb < 0) return 0;
+            if (va < 0) return 1;
+            if (vb < 0) return -1;
+            return va - vb;
+        }},
+        { id: 'strand_blocks', name: 'Strand Blocks',
+          desc: '<strong>Sort by Strand Blocks</strong><span class="tt-label">What it does:</span>Groups genes by strand direction (forward +, then reverse -), with genomic order preserved within each group.<span class="tt-label">When to use:</span>Visualize the strand distribution. In E. coli, there is a bias toward leading-strand genes near the origin of replication. This sort separates the two strands for easier comparison of their properties.',
+          fn: (a, b, g) => {
+            const diff = g[b][F.STRAND] - g[a][F.STRAND];
+            return diff !== 0 ? diff : g[a][F.START] - g[b][F.START];
+        }},
+    ];
+
+    // === COLOR SCHEMES ===
     const COLORS = {
         sequential: (v) => {
-            // Blue to Red gradient (like typical heatmaps)
-            const r = Math.floor(59 + 196 * v);  // 59 -> 255
-            const g = Math.floor(130 - 80 * v);  // 130 -> 50
-            const b = Math.floor(246 - 196 * v); // 246 -> 50
+            const r = Math.floor(235 - 190 * v);
+            const g = Math.floor(240 - 140 * v);
+            const b = Math.floor(250 - 70 * v);
             return `rgb(${r}, ${g}, ${b})`;
         },
-        binary: (v) => v ? '#22c55e' : '#ef4444',  // Green for +, Red for -
-        categorical: (v, cats) => {
+        binary: (v) => v ? '#6366f1' : '#f97316',
+        categorical: (v) => {
             const colors = ['#9ca3af', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ef4444'];
             return colors[v % colors.length];
         },
         consistency: (v) => {
-            // Red (low consistency) to Green (high consistency), Gray for missing
-            if (v < 0) return '#e5e7eb';  // Gray for missing data
-            // Red -> Yellow -> Green
+            if (v < 0) return '#e5e7eb';
             if (v < 0.5) {
-                const r = 239;
-                const g = Math.floor(68 + 180 * (v * 2));
-                return `rgb(${r}, ${g}, 68)`;
+                return `rgb(239, ${Math.floor(68 + 180 * (v * 2))}, 68)`;
             } else {
-                const r = Math.floor(239 - 205 * ((v - 0.5) * 2));
-                const g = Math.floor(248 - 52 * ((v - 0.5) * 2));
-                return `rgb(${r}, ${g}, 68)`;
+                return `rgb(${Math.floor(239 - 205 * ((v - 0.5) * 2))}, ${Math.floor(248 - 52 * ((v - 0.5) * 2))}, 68)`;
             }
         },
-        placeholder: () => '#f3f4f6'  // Light gray for placeholder tracks
+        placeholder: () => '#f3f4f6'
     };
 
+    // === STATE ===
     let genes = [];
     let sortedIndices = [];
     let currentSort = null;
     let zoomLevel = 1;
     let scrollPosition = 0;
     let canvas, ctx;
+    let searchMatches = new Set();
+    let selectedGene = null;
 
-    // Load data
+    // === DATA LOADING ===
     async function loadData() {
         try {
             const response = await fetch('genes_data.json');
@@ -389,63 +743,353 @@
     function init() {
         canvas = document.getElementById('heatmap');
         ctx = canvas.getContext('2d');
-
+        renderKPI();
+        renderAnalysisViews();
         renderTrackList();
+        renderSortPresets();
         setupEventListeners();
+        setupSectionCollapse();
         resize();
         render();
-
         document.getElementById('info').textContent = `${genes.length} genes loaded`;
     }
 
+    function setupSectionCollapse() {
+        document.querySelectorAll('.sidebar-section-title').forEach(title => {
+            title.addEventListener('click', () => {
+                title.parentElement.classList.toggle('collapsed');
+            });
+        });
+    }
+
+    // === KPI CARDS ===
+    function renderKPI() {
+        const total = genes.length;
+        const core = genes.filter(g => g[F.PAN_CAT] === 2).length;
+        const accessory = genes.filter(g => g[F.PAN_CAT] === 1).length;
+        const unknown = genes.filter(g => g[F.PAN_CAT] === 0).length;
+        const avgCons = genes.filter(g => g[F.AVG_CONS] >= 0);
+        const meanCons = avgCons.length ? (avgCons.reduce((s, g) => s + g[F.AVG_CONS], 0) / avgCons.length).toFixed(2) : 'N/A';
+        const naCount = genes.filter(g => g[F.AVG_CONS] < 0).length;
+        const lowCons = genes.filter(g => g[F.AVG_CONS] >= 0 && g[F.AVG_CONS] < 0.5).length;
+
+        document.getElementById('kpi-bar').innerHTML = `
+            <span class="kpi-stat"><span class="kpi-value">${total}</span><span class="kpi-label">genes</span></span>
+            <span class="kpi-stat"><span class="kpi-value">${core}</span><span class="kpi-label">core</span></span>
+            <span class="kpi-stat"><span class="kpi-value">${accessory}</span><span class="kpi-label">accessory</span></span>
+            <span class="kpi-stat"><span class="kpi-value">${unknown}</span><span class="kpi-label">unknown</span></span>
+            <span class="kpi-stat"><span class="kpi-value">${meanCons}</span><span class="kpi-label">avg consistency</span></span>
+            <span class="kpi-stat"><span class="kpi-value">${lowCons}</span><span class="kpi-label">low consistency</span></span>
+            <span class="kpi-stat"><span class="kpi-value">${naCount}</span><span class="kpi-label">no cluster</span></span>
+        `;
+    }
+
+    // === ANALYSIS VIEWS ===
+    const ANALYSIS_VIEWS = [
+        { id: 'characterization', name: 'Characterization Targets',
+          tracks: ['is_hypo', 'pan_category', 'conservation', 'avg_cons'],
+          sort: 'pan_status',
+          summary: 'Find conserved genes with unknown function',
+          desc: '<strong>Characterization Targets</strong>' +
+            '<span class="tt-label">Purpose:</span>Identify genes that are conserved across genomes but lack functional annotation. These are high-priority targets for experimental characterization.' +
+            '<span class="tt-label">What to look for:</span>Genes that show orange (hypothetical) in the first track but green (core) in the second. These are conserved in nearly all reference genomes yet both RAST and Bakta fail to assign a function.' +
+            '<span class="tt-label">Tracks shown:</span>Hypothetical Protein + Core/Accessory + Conservation + Avg Consistency' },
+        { id: 'annotation_quality', name: 'Annotation Quality',
+          tracks: ['agreement', 'avg_cons', 'specificity', 'is_hypo'],
+          sort: 'low_consistency',
+          summary: 'Spot annotation conflicts and gaps',
+          desc: '<strong>Annotation Quality Assessment</strong>' +
+            '<span class="tt-label">Purpose:</span>Evaluate the reliability of functional annotations. Spots genes where annotation tools disagree, consistency is low, or specificity is poor.' +
+            '<span class="tt-label">What to look for:</span>Genes sorted by lowest consistency first. Red cells = potential annotation problems. Look for patterns: do certain function types consistently show disagreement?' +
+            '<span class="tt-label">Tracks shown:</span>RAST/Bakta Agreement + Avg Consistency + Specificity + Hypothetical Flag' },
+        { id: 'metabolic', name: 'Metabolic Landscape',
+          tracks: ['n_ec', 'n_modules', 'ec_cons', 'ec_map_cons'],
+          sort: null,
+          summary: 'Map enzymatic and pathway coverage',
+          desc: '<strong>Metabolic Landscape</strong>' +
+            '<span class="tt-label">Purpose:</span>Visualize which genes have enzymatic activity, participate in metabolic modules, and how consistent their enzyme classifications are.' +
+            '<span class="tt-label">What to look for:</span>Dark bands in # EC and Module Hits indicate metabolic gene clusters. Compare EC Consistency vs EC Mapped Consistency to find genes where the EC assignment depends on the mapping method.' +
+            '<span class="tt-label">Tracks shown:</span># EC Numbers + KEGG Module Hits + EC Consistency + EC Mapped Consistency' },
+        { id: 'pangenome', name: 'Pangenome Structure',
+          tracks: ['conservation', 'pan_category', 'cluster_size', 'strand'],
+          sort: 'conservation',
+          summary: 'Explore pangenome architecture and gene families',
+          desc: '<strong>Pangenome Structure</strong>' +
+            '<span class="tt-label">Purpose:</span>Understand the pangenome architecture: which genes are core vs accessory, how large their gene families are, and where they sit in the genome.' +
+            '<span class="tt-label">What to look for:</span>Compare conservation fraction with cluster size. High conservation + small cluster = single-copy essential gene. High conservation + large cluster = expanded gene family with paralogs. Low conservation + small cluster = strain-specific gene.' +
+            '<span class="tt-label">Tracks shown:</span>Conservation + Core/Accessory + Cluster Size + Strand' },
+        { id: 'annotation_depth', name: 'Knowledge Coverage',
+          tracks: ['has_name', 'n_ko', 'n_go', 'n_pfam', 'n_ec'],
+          sort: 'annotation_quality',
+          summary: 'How well-characterized is each gene?',
+          desc: '<strong>Knowledge Coverage</strong>' +
+            '<span class="tt-label">Purpose:</span>See how deeply each gene is characterized across different databases. Well-studied genes have annotations from multiple sources.' +
+            '<span class="tt-label">What to look for:</span>Genes with all dark bands are well-characterized across all databases. Genes with all light bands are poorly studied. Mixed patterns (e.g., has KO but no Pfam) reveal database-specific coverage gaps.' +
+            '<span class="tt-label">Tracks shown:</span>Has Gene Name + # KO + # GO + # Pfam + # EC' },
+        { id: 'consistency_compare', name: 'Consistency Comparison',
+          tracks: ['rast_cons', 'ko_cons', 'bakta_cons', 'ec_cons', 'go_cons'],
+          sort: 'low_consistency',
+          summary: 'Compare consistency across annotation sources',
+          desc: '<strong>Consistency Source Comparison</strong>' +
+            '<span class="tt-label">Purpose:</span>Compare how each annotation source (RAST, KO, Bakta, EC, GO) rates gene consistency within pangenome clusters. Sources may disagree on the same gene.' +
+            '<span class="tt-label">What to look for:</span>Genes where one source is green but another is red. GO consistency tends to be higher (broader terms). EC consistency has more gray (many genes lack EC). RAST and Bakta should loosely agree but use different naming.' +
+            '<span class="tt-label">Tracks shown:</span>RAST + KO + Bakta + EC + GO Consistency' },
+    ];
+
+    let activeView = null;
+
+    function renderAnalysisViews() {
+        const container = document.getElementById('analysis-views');
+        container.innerHTML = ANALYSIS_VIEWS.map((v, i) =>
+            `<button class="analysis-view-btn ${activeView === v.id ? 'active' : ''}" data-view="${v.id}">` +
+            `<span><span class="av-name">${v.name}</span><br><span class="av-desc">${v.summary}</span></span>` +
+            `<span class="av-info-btn" data-av-desc="${i}">i</span>` +
+            `</button>`
+        ).join('');
+
+        // Click to activate view
+        container.querySelectorAll('.analysis-view-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (e.target.classList.contains('av-info-btn')) return;
+                const viewId = btn.dataset.view;
+                if (activeView === viewId) {
+                    // Deactivate: restore default tracks
+                    activeView = null;
+                    TRACKS.forEach(t => { t.enabled = ['order', 'strand', 'conservation', 'pan_category', 'avg_cons'].includes(t.id); });
+                } else {
+                    const view = ANALYSIS_VIEWS.find(v => v.id === viewId);
+                    activeView = viewId;
+                    // Disable all tracks, then enable only this view's tracks
+                    TRACKS.forEach(t => { t.enabled = view.tracks.includes(t.id); });
+                    // Apply sort if specified
+                    if (view.sort) applySortPreset(view.sort);
+                }
+                renderTrackList();
+                renderAnalysisViews();
+                render();
+            });
+        });
+
+        // Info tooltips
+        const descTooltip = document.getElementById('track-desc-tooltip');
+        container.querySelectorAll('.av-info-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', (e) => {
+                e.stopPropagation();
+                const view = ANALYSIS_VIEWS[parseInt(e.target.dataset.avDesc)];
+                if (!view.desc) return;
+                descTooltip.innerHTML = view.desc;
+                descTooltip.style.display = 'block';
+                const rect = e.target.getBoundingClientRect();
+                descTooltip.style.left = (rect.right + 8) + 'px';
+                const ttHeight = descTooltip.offsetHeight;
+                const maxTop = window.innerHeight - ttHeight - 10;
+                descTooltip.style.top = Math.max(10, Math.min(rect.top, maxTop)) + 'px';
+            });
+            btn.addEventListener('mouseleave', () => { descTooltip.style.display = 'none'; });
+        });
+    }
+
+    // === TRACK LIST ===
     function renderTrackList() {
         const list = document.getElementById('track-list');
         list.innerHTML = TRACKS.map((track, i) => `
             <div class="track-item ${track.enabled ? 'active' : ''}" data-track="${i}">
                 <input type="checkbox" id="track-${i}" ${track.enabled ? 'checked' : ''} onchange="toggleTrack(${i})">
+                <span class="info-btn" data-desc="${i}">i</span>
                 <label for="track-${i}">${track.name}</label>
-                <button class="sort-btn" onclick="sortByTrack(${i}); event.stopPropagation();">Sort ↓</button>
+                <button class="sort-btn" onclick="sortByTrack(${i}); event.stopPropagation();">Sort &#8595;</button>
             </div>
         `).join('');
+
+        const descTooltip = document.getElementById('track-desc-tooltip');
+        list.querySelectorAll('.info-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', (e) => {
+                const track = TRACKS[parseInt(e.target.dataset.desc)];
+                if (!track.desc) return;
+                descTooltip.innerHTML = track.desc;
+                descTooltip.style.display = 'block';
+                const rect = e.target.getBoundingClientRect();
+                descTooltip.style.left = (rect.right + 8) + 'px';
+                // Smart vertical positioning: don't let tooltip go off-screen
+                const ttHeight = descTooltip.offsetHeight;
+                const maxTop = window.innerHeight - ttHeight - 10;
+                descTooltip.style.top = Math.max(10, Math.min(rect.top, maxTop)) + 'px';
+            });
+            btn.addEventListener('mouseleave', () => { descTooltip.style.display = 'none'; });
+        });
     }
 
+    // === SORT PRESETS ===
+    function renderSortPresets() {
+        const container = document.getElementById('sort-presets');
+        container.innerHTML = SORT_PRESETS.map((p, i) =>
+            `<span class="sort-preset-wrapper"><button class="sort-preset-btn ${currentSort === p.id ? 'active' : ''}" onclick="applySortPreset('${p.id}')">${p.name}</button><span class="sort-info-btn" data-sort-desc="${i}">i</span></span>`
+        ).join('');
+
+        const descTooltip = document.getElementById('track-desc-tooltip');
+        container.querySelectorAll('.sort-info-btn').forEach(btn => {
+            btn.addEventListener('mouseenter', (e) => {
+                const preset = SORT_PRESETS[parseInt(e.target.dataset.sortDesc)];
+                if (!preset.desc) return;
+                descTooltip.innerHTML = preset.desc;
+                descTooltip.style.display = 'block';
+                const rect = e.target.getBoundingClientRect();
+                descTooltip.style.left = (rect.right + 8) + 'px';
+                const ttHeight = descTooltip.offsetHeight;
+                const maxTop = window.innerHeight - ttHeight - 10;
+                descTooltip.style.top = Math.max(10, Math.min(rect.top, maxTop)) + 'px';
+            });
+            btn.addEventListener('mouseleave', () => { descTooltip.style.display = 'none'; });
+        });
+    }
+
+    function applySortPreset(presetId) {
+        const preset = SORT_PRESETS.find(p => p.id === presetId);
+        if (!preset) return;
+        if (presetId === 'genome') {
+            sortedIndices = genes.map((_, i) => i);
+        } else {
+            sortedIndices = [...Array(genes.length).keys()].sort((a, b) => preset.fn(a, b, genes));
+        }
+        currentSort = preset.id;
+        document.getElementById('info').textContent = `Sorted by: ${preset.name}`;
+        renderSortPresets();
+        render();
+    }
+
+    // === SEARCH ===
+    function handleSearch(query) {
+        const info = document.getElementById('search-info');
+        searchMatches.clear();
+        if (!query || query.length < 2) {
+            info.style.display = 'none';
+            render();
+            return;
+        }
+        const q = query.toLowerCase();
+        genes.forEach((g, i) => {
+            const fid = String(g[F.FID]).toLowerCase();
+            const func = (g[F.FUNC] || '').toLowerCase();
+            if (fid.includes(q) || func.includes(q)) {
+                searchMatches.add(i);
+            }
+        });
+        info.textContent = `${searchMatches.size} matches`;
+        info.style.display = 'block';
+
+        // Jump to first match
+        if (searchMatches.size > 0) {
+            const firstMatch = [...searchMatches][0];
+            const posInSorted = sortedIndices.indexOf(firstMatch);
+            if (posInSorted >= 0) {
+                const visibleGenes = Math.max(100, Math.floor(genes.length / zoomLevel));
+                scrollPosition = Math.min(1, posInSorted / Math.max(1, genes.length - visibleGenes));
+                document.getElementById('position-slider').value = scrollPosition * 100;
+            }
+        }
+        render();
+    }
+
+    // === GENE DETAIL PANEL ===
+    function showGeneDetail(geneIdx) {
+        const gene = genes[geneIdx];
+        selectedGene = geneIdx;
+        const panel = document.getElementById('gene-detail-panel');
+        const title = document.getElementById('detail-title');
+        const body = document.getElementById('detail-body');
+
+        title.textContent = `Gene ${gene[F.FID]}`;
+
+        const consBar = (val) => {
+            if (val < 0) return '<span style="color:#9ca3af">N/A</span>';
+            const color = COLORS.consistency(val);
+            return `<span class="cons-bar" style="background:${color}"></span>${val.toFixed(4)}`;
+        };
+
+        body.innerHTML = `
+            <div class="detail-section">
+                <div class="detail-section-title">Function</div>
+                <div class="detail-func">${gene[F.FUNC] || 'No function annotation'}</div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-section-title">Genomic Location</div>
+                <div class="detail-row"><span class="detail-label">Position</span><span class="detail-value">${gene[F.START]}</span></div>
+                <div class="detail-row"><span class="detail-label">Length</span><span class="detail-value">${gene[F.LENGTH]} bp</span></div>
+                <div class="detail-row"><span class="detail-label">Strand</span><span class="detail-value">${gene[F.STRAND] ? '+' : '-'}</span></div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-section-title">Pangenome</div>
+                <div class="detail-row"><span class="detail-label">Category</span><span class="detail-value">${PAN_NAMES[gene[F.PAN_CAT]]}</span></div>
+                <div class="detail-row"><span class="detail-label">Conservation</span><span class="detail-value">${(gene[F.CONS_FRAC] * 100).toFixed(1)}%</span></div>
+                <div class="detail-row"><span class="detail-label">Cluster Size</span><span class="detail-value">${gene[F.CLUSTER_SIZE] || 'N/A'}</span></div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-section-title">Consistency Scores</div>
+                <div class="detail-row"><span class="detail-label">Average</span><span class="detail-value">${consBar(gene[F.AVG_CONS])}</span></div>
+                <div class="detail-row"><span class="detail-label">RAST</span><span class="detail-value">${consBar(gene[F.RAST_CONS])}</span></div>
+                <div class="detail-row"><span class="detail-label">KO</span><span class="detail-value">${consBar(gene[F.KO_CONS])}</span></div>
+                <div class="detail-row"><span class="detail-label">GO</span><span class="detail-value">${consBar(gene[F.GO_CONS])}</span></div>
+                <div class="detail-row"><span class="detail-label">EC</span><span class="detail-value">${consBar(gene[F.EC_CONS])}</span></div>
+                <div class="detail-row"><span class="detail-label">EC Mapped</span><span class="detail-value">${consBar(gene[F.EC_MAP_CONS])}</span></div>
+                <div class="detail-row"><span class="detail-label">Bakta</span><span class="detail-value">${consBar(gene[F.BAKTA_CONS])}</span></div>
+                <div class="detail-row"><span class="detail-label">Specificity</span><span class="detail-value">${consBar(gene[F.SPECIFICITY])}</span></div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-section-title">Annotation</div>
+                <div class="detail-row"><span class="detail-label">Gene Name</span><span class="detail-value">${gene[F.HAS_NAME] ? 'Yes' : 'No'}</span></div>
+                <div class="detail-row"><span class="detail-label">Hypothetical</span><span class="detail-value">${gene[F.IS_HYPO] ? 'Yes (both tools)' : 'No'}</span></div>
+                <div class="detail-row"><span class="detail-label">RAST/Bakta</span><span class="detail-value">${AGREE_NAMES[gene[F.AGREEMENT]]}</span></div>
+                <div class="detail-row"><span class="detail-label">Protein Length</span><span class="detail-value">${gene[F.PROT_LEN]} aa</span></div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-section-title">Annotation Counts</div>
+                <div class="detail-row"><span class="detail-label">KEGG</span><span class="detail-value">${gene[F.N_KO]}</span></div>
+                <div class="detail-row"><span class="detail-label">COG</span><span class="detail-value">${gene[F.N_COG]}</span></div>
+                <div class="detail-row"><span class="detail-label">Pfam</span><span class="detail-value">${gene[F.N_PFAM]}</span></div>
+                <div class="detail-row"><span class="detail-label">GO</span><span class="detail-value">${gene[F.N_GO]}</span></div>
+                <div class="detail-row"><span class="detail-label">EC</span><span class="detail-value">${gene[F.N_EC]}</span></div>
+                <div class="detail-row"><span class="detail-label">KEGG Modules</span><span class="detail-value">${gene[F.N_MODULES]}</span></div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-section-title">Localization</div>
+                <div class="detail-row"><span class="detail-label">PSORTb</span><span class="detail-value">${LOC_NAMES[gene[F.LOC]] || 'Unknown'}</span></div>
+            </div>
+        `;
+        panel.classList.add('open');
+    }
+
+    function closeDetail() {
+        document.getElementById('gene-detail-panel').classList.remove('open');
+        selectedGene = null;
+    }
+
+    // === TOGGLE / ACTIONS ===
     function toggleTrack(idx) {
         TRACKS[idx].enabled = !TRACKS[idx].enabled;
         renderTrackList();
         render();
     }
-
-    function selectAll() {
-        TRACKS.forEach(t => t.enabled = true);
-        renderTrackList();
-        render();
-    }
-
-    function deselectAll() {
-        TRACKS.forEach(t => t.enabled = false);
-        renderTrackList();
-        render();
-    }
+    function selectAll() { TRACKS.forEach(t => t.enabled = true); renderTrackList(); render(); }
+    function deselectAll() { TRACKS.forEach(t => t.enabled = false); renderTrackList(); render(); }
 
     function sortByTrack(idx) {
         const track = TRACKS[idx];
-        const field = track.field;
-
-        sortedIndices = [...sortedIndices].sort((a, b) => {
-            const va = genes[a][field];
-            const vb = genes[b][field];
-            return vb - va; // Descending
+        sortedIndices = [...Array(genes.length).keys()].sort((a, b) => {
+            const va = genes[a][track.field], vb = genes[b][track.field];
+            if (typeof va === 'string') return va.localeCompare(vb);
+            return vb - va;
         });
-
-        currentSort = track.name;
+        currentSort = null;
         document.getElementById('info').textContent = `Sorted by: ${track.name}`;
+        renderSortPresets();
         render();
     }
 
     function resetSort() {
         sortedIndices = genes.map((_, i) => i);
-        currentSort = null;
+        currentSort = 'genome';
         document.getElementById('info').textContent = `${genes.length} genes (genome order)`;
+        renderSortPresets();
         render();
     }
 
@@ -457,44 +1101,36 @@
         render();
     }
 
+    // === EVENT LISTENERS ===
     function setupEventListeners() {
         window.addEventListener('resize', () => { resize(); render(); });
-
-        document.getElementById('zoom-slider').addEventListener('input', (e) => {
-            zoomLevel = parseFloat(e.target.value);
-            render();
-        });
-
-        document.getElementById('position-slider').addEventListener('input', (e) => {
-            scrollPosition = parseFloat(e.target.value) / 100;
-            render();
-        });
-
+        document.getElementById('zoom-slider').addEventListener('input', (e) => { zoomLevel = parseFloat(e.target.value); render(); });
+        document.getElementById('position-slider').addEventListener('input', (e) => { scrollPosition = parseFloat(e.target.value) / 100; render(); });
         canvas.addEventListener('mousemove', handleMouseMove);
-        canvas.addEventListener('mouseleave', () => {
-            document.getElementById('tooltip').style.display = 'none';
+        canvas.addEventListener('mouseleave', () => { document.getElementById('tooltip').style.display = 'none'; });
+        canvas.addEventListener('click', handleClick);
+
+        let searchTimeout;
+        document.getElementById('gene-search').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => handleSearch(e.target.value.trim()), 200);
         });
     }
 
+    // === TOOLTIP (enriched) ===
     function handleMouseMove(e) {
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-
         const enabledTracks = TRACKS.filter(t => t.enabled);
         const labelWidth = 140;
         const trackHeight = Math.min(40, (canvas.height - 10) / enabledTracks.length);
         const heatmapWidth = canvas.width - labelWidth - 10;
-
         const visibleGenes = Math.max(100, Math.floor(genes.length / zoomLevel));
         const startIdx = Math.floor(scrollPosition * Math.max(0, genes.length - visibleGenes));
         const geneWidth = heatmapWidth / visibleGenes;
 
-        // Only show tooltip if mouse is over heatmap area (past labels)
-        if (x < labelWidth) {
-            document.getElementById('tooltip').style.display = 'none';
-            return;
-        }
+        if (x < labelWidth) { document.getElementById('tooltip').style.display = 'none'; return; }
 
         const geneIdx = Math.floor((x - labelWidth) / geneWidth) + startIdx;
         const trackIdx = Math.floor((y - 5) / trackHeight);
@@ -503,29 +1139,67 @@
             const gene = genes[sortedIndices[geneIdx]];
             const track = enabledTracks[trackIdx];
 
+            let trackValue = '';
+            if (track.field >= 0) {
+                const raw = gene[track.field];
+                if (track.type === 'consistency') trackValue = raw < 0 ? 'N/A' : raw.toFixed(4);
+                else if (track.type === 'sequential') trackValue = typeof raw === 'number' ? (Number.isInteger(raw) ? raw : raw.toFixed(4)) : raw;
+                else if (track.type === 'binary') trackValue = raw ? '+' : '-';
+                else if (track.type === 'categorical' && track.categories) trackValue = track.categories[raw] || raw;
+                else trackValue = raw;
+            }
+
+            const fmtCons = (v) => v < 0 ? '<span class="tt-label">N/A</span>' : `<span class="tt-val">${v.toFixed(3)}</span>`;
+
             const tooltip = document.getElementById('tooltip');
             tooltip.innerHTML = `
-                <div class="gene-id">Gene: ${gene[1]}</div>
-                <div>Position: ${gene[3]}</div>
-                <div>Length: ${gene[2]} bp</div>
-                <div>Strand: ${gene[4] ? '+' : '-'}</div>
-                <div>Conservation: ${(gene[5] * 100).toFixed(1)}%</div>
-                <div class="func">${gene[7] || 'No function annotation'}</div>
+                <div class="gene-id">Gene ${gene[F.FID]}</div>
+                <div class="tt-row"><span class="tt-label">Position</span><span class="tt-val">${gene[F.START]} | ${gene[F.LENGTH]} bp | ${gene[F.STRAND] ? '+' : '-'}</span></div>
+                <div class="tt-row"><span class="tt-label">Pangenome</span><span class="tt-val">${PAN_NAMES[gene[F.PAN_CAT]]} (${(gene[F.CONS_FRAC] * 100).toFixed(0)}%)</span></div>
+                <div class="tt-row"><span class="tt-label">${track.name}</span><span class="tt-highlight">${trackValue}</span></div>
+                <div class="tt-section">
+                    <div class="tt-row"><span class="tt-label">Avg / RAST / Bakta</span><span class="tt-val">${fmtCons(gene[F.AVG_CONS])} / ${fmtCons(gene[F.RAST_CONS])} / ${fmtCons(gene[F.BAKTA_CONS])}</span></div>
+                    <div class="tt-row"><span class="tt-label">KO / GO / EC</span><span class="tt-val">${fmtCons(gene[F.KO_CONS])} / ${fmtCons(gene[F.GO_CONS])} / ${fmtCons(gene[F.EC_CONS])}</span></div>
+                    <div class="tt-row"><span class="tt-label">Terms</span><span class="tt-val">KO:${gene[F.N_KO]} COG:${gene[F.N_COG]} Pfam:${gene[F.N_PFAM]} GO:${gene[F.N_GO]} EC:${gene[F.N_EC]}</span></div>
+                    <div class="tt-row"><span class="tt-label">Location</span><span class="tt-val">${LOC_NAMES[gene[F.LOC]] || '?'}</span></div>
+                    <div class="tt-row"><span class="tt-label">Status</span><span class="tt-val">${gene[F.IS_HYPO] ? 'Hypothetical' : (gene[F.HAS_NAME] ? 'Named' : 'Unnamed')} | ${AGREE_NAMES[gene[F.AGREEMENT]]} | ${gene[F.PROT_LEN]}aa</span></div>
+                </div>
+                <div class="func">${gene[F.FUNC] || 'No function annotation'}</div>
             `;
             tooltip.style.display = 'block';
-            tooltip.style.left = Math.min(e.clientX + 10, window.innerWidth - 320) + 'px';
-            tooltip.style.top = (e.clientY + 10) + 'px';
+            tooltip.style.left = Math.min(e.clientX + 12, window.innerWidth - 400) + 'px';
+            tooltip.style.top = Math.min(e.clientY + 12, window.innerHeight - 250) + 'px';
         } else {
             document.getElementById('tooltip').style.display = 'none';
         }
     }
 
+    // === CLICK → GENE DETAIL ===
+    function handleClick(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const enabledTracks = TRACKS.filter(t => t.enabled);
+        const labelWidth = 140;
+        const heatmapWidth = canvas.width - labelWidth - 10;
+        const visibleGenes = Math.max(100, Math.floor(genes.length / zoomLevel));
+        const startIdx = Math.floor(scrollPosition * Math.max(0, genes.length - visibleGenes));
+        const geneWidth = heatmapWidth / visibleGenes;
+
+        if (x < labelWidth) return;
+        const geneIdx = Math.floor((x - labelWidth) / geneWidth) + startIdx;
+        if (geneIdx >= 0 && geneIdx < genes.length) {
+            showGeneDetail(sortedIndices[geneIdx]);
+        }
+    }
+
+    // === RESIZE ===
     function resize() {
         const container = document.querySelector('.heatmap-container');
         canvas.width = container.clientWidth;
         canvas.height = container.clientHeight;
     }
 
+    // === RENDER ===
     function render() {
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -540,114 +1214,106 @@
             return;
         }
 
-        const labelWidth = 140;  // Space for track labels on left
+        const labelWidth = 140;
         const trackHeight = Math.min(40, (canvas.height - 10) / enabledTracks.length);
         const heatmapWidth = canvas.width - labelWidth - 10;
-
-        // Calculate visible range
         const visibleGenes = Math.max(100, Math.floor(genes.length / zoomLevel));
         const startIdx = Math.floor(scrollPosition * Math.max(0, genes.length - visibleGenes));
         const endIdx = Math.min(genes.length, startIdx + visibleGenes);
         const geneWidth = heatmapWidth / visibleGenes;
 
-        // Update position info
         document.getElementById('position-info').textContent = `${startIdx} - ${endIdx} of ${genes.length}`;
 
-        // Compute min/max for each track
+        // Compute min/max for sequential tracks
         const trackStats = {};
         enabledTracks.forEach(track => {
             if (track.type === 'sequential') {
                 let min = Infinity, max = -Infinity;
-                genes.forEach(g => {
-                    const v = g[track.field];
+                for (let i = 0; i < genes.length; i++) {
+                    const v = genes[i][track.field];
                     if (v < min) min = v;
                     if (v > max) max = v;
-                });
+                }
                 trackStats[track.id] = { min, max, range: max - min || 1 };
             }
         });
+
+        const hasSearch = searchMatches.size > 0;
 
         // Draw tracks
         enabledTracks.forEach((track, ti) => {
             const y = 5 + ti * trackHeight;
 
-            // Track label background
+            // Track label
             ctx.fillStyle = '#f8fafc';
             ctx.fillRect(0, y, labelWidth - 5, trackHeight - 2);
-
-            // Track label
             ctx.fillStyle = '#374151';
             ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillText(track.name, 8, y + trackHeight / 2 + 4);
 
-            // Draw heatmap cells
+            // Heatmap cells
             for (let i = startIdx; i < endIdx; i++) {
-                const gene = genes[sortedIndices[i]];
+                const realIdx = sortedIndices[i];
+                const gene = genes[realIdx];
                 const x = labelWidth + (i - startIdx) * geneWidth;
                 const value = gene[track.field];
 
                 let color;
                 if (track.type === 'sequential') {
                     const stats = trackStats[track.id];
-                    const normalized = (value - stats.min) / stats.range;
-                    color = COLORS.sequential(normalized);
+                    color = COLORS.sequential((value - stats.min) / stats.range);
                 } else if (track.type === 'binary') {
                     color = COLORS.binary(value);
                 } else if (track.type === 'categorical') {
-                    color = COLORS.categorical(value, track.categories);
+                    color = COLORS.categorical(value);
                 } else if (track.type === 'consistency') {
-                    // Consistency scores: 0-1, or -1 for missing
                     color = COLORS.consistency(value);
-                } else if (track.type === 'placeholder') {
+                } else {
                     color = COLORS.placeholder();
                 }
 
                 ctx.fillStyle = color;
                 ctx.fillRect(x, y, Math.max(1, geneWidth - 0.5), trackHeight - 2);
+
+                // Dim non-matching genes during search
+                if (hasSearch && !searchMatches.has(realIdx)) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                    ctx.fillRect(x, y, Math.max(1, geneWidth - 0.5), trackHeight - 2);
+                }
             }
         });
 
-        // Draw legend
         renderLegend(enabledTracks);
     }
 
+    // === LEGEND ===
     function renderLegend(enabledTracks) {
         const legend = document.getElementById('legend');
-        let html = '';
-
-        // Sequential gradient
-        html += `<div class="legend-item">
-            <span class="legend-label">Value:</span>
-            <span>Low</span>
-            <div class="legend-color" style="background: linear-gradient(to right, rgb(59,130,246), rgb(255,50,50)); width: 60px;"></div>
-            <span>High</span>
-        </div>`;
-
-        // Consistency gradient
-        html += `<div class="legend-item">
-            <span class="legend-label">Consistency:</span>
-            <span>0</span>
-            <div class="legend-color" style="background: linear-gradient(to right, #ef4444, #fbbf24, #22c55e); width: 60px;"></div>
-            <span>1</span>
-            <div class="legend-color" style="background: #e5e7eb;"></div><span>N/A</span>
-        </div>`;
-
-        // Binary (Strand direction)
-        html += `<div class="legend-item">
-            <span class="legend-label">Strand:</span>
-            <div class="legend-color" style="background: #22c55e;"></div><span>+</span>
-            <div class="legend-color" style="background: #ef4444;"></div><span>−</span>
-        </div>`;
-
-        // Core/Accessory
-        html += `<div class="legend-item">
-            <span class="legend-label">Category:</span>
-            <div class="legend-color" style="background: #9ca3af;"></div><span>?</span>
-            <div class="legend-color" style="background: #f59e0b;"></div><span>Acc</span>
-            <div class="legend-color" style="background: #22c55e;"></div><span>Core</span>
-        </div>`;
-
-        legend.innerHTML = html;
+        legend.innerHTML = `
+            <div class="legend-item">
+                <span class="legend-label">Value:</span><span>Low</span>
+                <div class="legend-color" style="background: linear-gradient(to right, rgb(235,240,250), rgb(45,100,180)); width: 50px;"></div>
+                <span>High</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-label">Consistency:</span><span>0</span>
+                <div class="legend-color" style="background: linear-gradient(to right, #ef4444, #fbbf24, #22c55e); width: 50px;"></div>
+                <span>1</span>
+                <div class="legend-color" style="background: #e5e7eb;"></div><span>N/A</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-label">Binary:</span>
+                <div class="legend-color" style="background: #6366f1;"></div><span>Yes/+</span>
+                <div class="legend-color" style="background: #f97316;"></div><span>No/-</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-label">Category:</span>
+                <div class="legend-color" style="background: #9ca3af;"></div><span>Unknown</span>
+                <div class="legend-color" style="background: #f59e0b;"></div><span>Acc/1</span>
+                <div class="legend-color" style="background: #22c55e;"></div><span>Core/2</span>
+                <div class="legend-color" style="background: #3b82f6;"></div><span>3</span>
+            </div>
+        `;
     }
 
     // Start
