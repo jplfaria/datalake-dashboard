@@ -848,9 +848,9 @@
             '<span class="tt-label">Tip:</span>Bakta consistency is a strong signal. When both RAST and Bakta are low, the gene likely has a genuinely unusual function for its cluster.' },
         { id: 'specificity', name: 'Annotation Specificity', field: F.SPECIFICITY, type: 'consistency', enabled: false,
           desc: '<strong>Annotation Specificity</strong>' +
-            '<span class="tt-label">What it shows:</span>How specific or unique this gene\'s functional annotation is within its pangenome cluster. Computed as 1/N where N = the number of distinct annotations seen across cluster members.' +
-            '<span class="tt-label">How to read it:</span>1.0 (green) = only one annotation exists in the entire cluster (highly specific). Low values (red) = many different annotations exist in the cluster (ambiguous). Gray = no cluster assignment.' +
-            '<span class="tt-label">Why it matters:</span>Low specificity suggests the cluster contains genes with diverse functions, possibly because the cluster is too broad, or the genes have diverged in function.' },
+            '<span class="tt-label">What it shows:</span>How precise and detailed the functional annotation is for this gene. Based on annotation text quality and ontology evidence (EC numbers, KO terms, gene names, COG/GO assignments).' +
+            '<span class="tt-label">How to read it:</span>1.0 (green) = highly specific annotation with EC number and named enzyme. 0.6-0.8 = good annotation with KO or gene name. 0.3-0.5 = vague annotation (putative, uncharacterized). 0.0 (red) = hypothetical protein. Gray = no cluster.' +
+            '<span class="tt-label">Why it matters:</span>Low specificity highlights genes needing better characterization. Unlike consistency (which measures cluster agreement), specificity measures how informative the annotation itself is.' },
         { id: 'n_ko', name: '# KEGG Terms', field: F.N_KO, type: 'sequential', enabled: false,
           desc: '<strong># KEGG Orthology Terms</strong>' +
             '<span class="tt-label">What it shows:</span>Number of KEGG Orthology (KO) identifiers assigned to this gene.' +
@@ -1921,9 +1921,9 @@
                 },
                 'is_hypo': {
                     html: '<span class="legend-label">Hypothetical:</span>' +
-                        '<div class="legend-color" style="background: #6366f1;"></div><span>Has function</span>' +
-                        '<div class="legend-color" style="background: #f97316;"></div><span>Hypothetical</span>',
-                    tip: 'Purple = at least one annotation tool (RAST or Bakta) assigned a function. Orange = both tools classify this gene as hypothetical (function unknown).'
+                        '<div class="legend-color" style="background: #6366f1;"></div><span>Hypothetical</span>' +
+                        '<div class="legend-color" style="background: #f97316;"></div><span>Has function</span>',
+                    tip: 'Purple = both annotation tools (RAST and Bakta) classify this gene as hypothetical (function unknown). Orange = at least one tool assigned a function.'
                 },
                 'has_name': {
                     html: '<span class="legend-label">Gene Name:</span>' +

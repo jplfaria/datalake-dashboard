@@ -3,6 +3,11 @@
 
 Processes genome_reactions.tsv to produce per-reaction data for the user genome
 including conservation across reference genomes, flux values, and flux classes.
+
+NOTE: The genome_reactions.tsv is a TEMPORARY data source. This table will be
+added to the BERDL SQLite database (berdl_tables_ontology_terms.db) in a future
+pipeline update. When that happens, update this script to read from the DB
+instead of the TSV file.
 """
 
 import csv
