@@ -4,12 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genome Heatmap Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --kb-primary-lightest: #DFEEF6;
+            --kb-primary-lighter: #CCE5F3;
+            --kb-primary-light: #66B1DB;
+            --kb-primary: #026DAA;
+            --kb-primary-vivid: #03517D;
+            --kb-primary-dark: #023E60;
+            --kb-primary-darker: #022940;
+            --kb-base-lightest: #F2EFEB;
+            --kb-base-lighter: #DED5CB;
+            --kb-base-light: #9D9389;
+            --kb-base: #6A6158;
+            --kb-base-dark: #544C45;
+            --kb-base-darker: #3E3832;
+            --kb-white: #FFFFFF;
+            --kb-ink: #171412;
+            --kb-secondary: #009688;
+            --kb-secondary-light: #99D5CF;
+            --kb-secondary-lightest: #E5F4F1;
+            --kb-microbe-orange: #F78E1E;
+            --kb-golden-yellow: #FFD200;
+            --kb-grass-green: #5E9732;
+            --kb-spring-green: #C1CD23;
+            --kb-freshwater-blue: #037AC0;
+            --kb-ocean-blue: #72CCD2;
+            --kb-cyanobacteria-teal: #009688;
+            --kb-lupine-purple: #66489D;
+            --kb-frost-blue: #C7DBEE;
+            --kb-cherry-red: #D2232A;
+            --kb-graphite-grey: #9D9389;
+            --kb-success: #118577;
+            --kb-error: #D2232A;
+            --kb-warning: #FFD200;
+            --kb-info: #A1B9CF;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f7fa;
-            color: #333;
+            font-family: Oxygen, -apple-system, BlinkMacSystemFont, avenir next, avenir, helvetica neue, helvetica, ubuntu, roboto, noto, segoe ui, arial, sans-serif;
+            background: var(--kb-base-lightest);
+            color: var(--kb-base-darker);
             height: 100vh;
             overflow: hidden;
             display: flex;
@@ -17,8 +55,8 @@
         }
         .tab-bar {
             display: flex;
-            background: #fff;
-            border-bottom: 1px solid #e0e0e0;
+            background: var(--kb-white);
+            border-bottom: 1px solid var(--kb-base-lighter);
             padding: 0 16px;
             flex-shrink: 0;
         }
@@ -27,48 +65,48 @@
             background: none;
             border: none;
             border-bottom: 2px solid transparent;
-            color: #6b7280;
+            color: var(--kb-base);
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.15s;
         }
-        .tab-btn:hover { color: #2563eb; background: #f0f7ff; }
-        .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; }
+        .tab-btn:hover { color: var(--kb-primary); background: var(--kb-primary-lightest); }
+        .tab-btn.active { color: var(--kb-primary); border-bottom-color: var(--kb-primary); }
         .tab-content { display: none; flex: 1; overflow: hidden; }
         .tab-content.active { display: flex; }
         .sidebar {
             width: 280px;
-            background: #fff;
+            background: var(--kb-white);
             padding: 0;
             overflow-y: auto;
-            border-right: 1px solid #e0e0e0;
+            border-right: 1px solid var(--kb-base-lighter);
             box-shadow: 2px 0 4px rgba(0,0,0,0.05);
         }
         .sidebar-header {
-            background: #2563eb;
+            background: var(--kb-primary);
             color: white;
             padding: 12px 16px;
             font-size: 14px;
             font-weight: 600;
         }
-        .sidebar-section { border-bottom: 1px solid #e0e0e0; }
+        .sidebar-section { border-bottom: 1px solid var(--kb-base-lighter); }
         .sidebar-section-title {
             padding: 10px 16px;
             font-size: 11px;
             font-weight: 600;
-            color: #666;
+            color: var(--kb-base);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            background: #fafafa;
-            border-bottom: 1px solid #e0e0e0;
+            background: var(--kb-base-lightest);
+            border-bottom: 1px solid var(--kb-base-lighter);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
-        .sidebar-section-title:hover { background: #f0f0f0; }
-        .sidebar-section-title .toggle-icon { font-size: 10px; color: #999; transition: transform 0.2s; }
+        .sidebar-section-title:hover { background: var(--kb-base-lighter); }
+        .sidebar-section-title .toggle-icon { font-size: 10px; color: var(--kb-base-light); transition: transform 0.2s; }
         .sidebar-section.collapsed .toggle-icon { transform: rotate(-90deg); }
         .sidebar-section.collapsed > :not(.sidebar-section-title) { display: none !important; }
         .main {
@@ -76,23 +114,23 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            background: #fff;
+            background: var(--kb-white);
         }
         /* Search */
         .search-box {
             padding: 8px 12px;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid var(--kb-base-lighter);
         }
         .search-box input {
             width: 100%;
             padding: 7px 10px;
-            border: 1px solid #d1d5db;
+            border: 1px solid var(--kb-base-lighter);
             border-radius: 4px;
             font-size: 12px;
             outline: none;
         }
-        .search-box input:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
-        .search-info { font-size: 10px; color: #888; margin-top: 4px; display: none; }
+        .search-box input:focus { border-color: var(--kb-primary); box-shadow: 0 0 0 2px rgba(2,109,170,0.15); }
+        .search-info { font-size: 10px; color: var(--kb-base-light); margin-top: 4px; display: none; }
         /* Track list */
         .track-list { padding: 4px 0; }
         .track-item {
@@ -103,18 +141,18 @@
             transition: background 0.15s;
             border-left: 3px solid transparent;
         }
-        .track-item:hover { background: #f5f7fa; }
-        .track-item.active { background: #eff6ff; border-left-color: #2563eb; }
+        .track-item:hover { background: var(--kb-base-lightest); }
+        .track-item.active { background: var(--kb-primary-lightest); border-left-color: var(--kb-primary); }
         .track-item input[type="checkbox"] {
             margin-right: 6px;
             width: 14px;
             height: 14px;
-            accent-color: #2563eb;
+            accent-color: var(--kb-primary);
             cursor: pointer;
         }
-        .track-item label { flex: 1; cursor: pointer; font-size: 12px; color: #444; }
+        .track-item label { flex: 1; cursor: pointer; font-size: 12px; color: var(--kb-base-dark); }
         .track-item .sort-btn {
-            background: #2563eb;
+            background: var(--kb-primary);
             border: none;
             color: white;
             padding: 2px 6px;
@@ -126,51 +164,51 @@
             font-weight: 500;
         }
         .track-item:hover .sort-btn { opacity: 1; }
-        .track-item .sort-btn:hover { background: #1d4ed8; }
+        .track-item .sort-btn:hover { background: var(--kb-primary-dark); }
         /* Analysis views */
         .analysis-views { padding: 4px 8px; }
         .analysis-view-btn {
             display: flex; align-items: center; gap: 6px;
             width: 100%; text-align: left;
-            background: #f3f4f6; border: 1px solid #d1d5db; color: #374151;
+            background: var(--kb-base-lightest); border: 1px solid var(--kb-base-lighter); color: var(--kb-base-darker);
             padding: 6px 10px; border-radius: 4px; cursor: pointer;
             font-size: 11px; transition: all 0.15s; margin-bottom: 3px;
         }
-        .analysis-view-btn:hover { background: #eff6ff; border-color: #93c5fd; }
-        .analysis-view-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+        .analysis-view-btn:hover { background: var(--kb-primary-lightest); border-color: var(--kb-primary-light); }
+        .analysis-view-btn.active { background: var(--kb-primary); color: white; border-color: var(--kb-primary); }
         .analysis-view-btn .av-name { font-weight: 600; }
-        .analysis-view-btn .av-desc { font-size: 10px; color: #6b7280; }
-        .analysis-view-btn.active .av-desc { color: #bfdbfe; }
+        .analysis-view-btn .av-desc { font-size: 10px; color: var(--kb-base); }
+        .analysis-view-btn.active .av-desc { color: var(--kb-primary-lighter); }
         .av-info-btn {
-            width: 12px; height: 12px; border-radius: 50%; border: 1px solid #d1d5db;
-            background: #f9fafb; color: #9ca3af; font-size: 8px; cursor: help;
+            width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--kb-base-lighter);
+            background: var(--kb-base-lightest); color: var(--kb-base-light); font-size: 8px; cursor: help;
             display: inline-flex; align-items: center; justify-content: center;
             flex-shrink: 0; margin-left: auto;
         }
-        .av-info-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
-        .analysis-view-btn.active .av-info-btn { border-color: #93c5fd; background: #1d4ed8; color: white; }
+        .av-info-btn:hover { background: var(--kb-primary); color: white; border-color: var(--kb-primary); }
+        .analysis-view-btn.active .av-info-btn { border-color: var(--kb-primary-light); background: var(--kb-primary-dark); color: white; }
         /* Sort presets */
         .sort-presets { padding: 6px 12px; display: flex; flex-wrap: wrap; gap: 4px; }
         .sort-preset-wrapper { position: relative; display: inline-flex; align-items: center; }
         .sort-preset-btn {
-            background: #f3f4f6;
-            border: 1px solid #d1d5db;
-            color: #374151;
+            background: var(--kb-base-lightest);
+            border: 1px solid var(--kb-base-lighter);
+            color: var(--kb-base-darker);
             padding: 4px 8px;
             border-radius: 3px;
             cursor: pointer;
             font-size: 10px;
             transition: all 0.15s;
         }
-        .sort-preset-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
-        .sort-preset-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+        .sort-preset-btn:hover { background: var(--kb-primary); color: white; border-color: var(--kb-primary); }
+        .sort-preset-btn.active { background: var(--kb-primary); color: white; border-color: var(--kb-primary); }
         .sort-info-btn {
-            width: 12px; height: 12px; border-radius: 50%; border: 1px solid #d1d5db;
-            background: #f9fafb; color: #9ca3af; font-size: 8px; cursor: help;
+            width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--kb-base-lighter);
+            background: var(--kb-base-lightest); color: var(--kb-base-light); font-size: 8px; cursor: help;
             display: inline-flex; align-items: center; justify-content: center;
             margin-left: 2px; flex-shrink: 0;
         }
-        .sort-info-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
+        .sort-info-btn:hover { background: var(--kb-primary); color: white; border-color: var(--kb-primary); }
         /* Actions */
         .action-item {
             display: flex;
@@ -178,10 +216,10 @@
             padding: 8px 12px;
             cursor: pointer;
             transition: background 0.15s;
-            color: #2563eb;
+            color: var(--kb-primary);
             font-size: 12px;
         }
-        .action-item:hover { background: #eff6ff; }
+        .action-item:hover { background: var(--kb-primary-lightest); }
         .action-item .icon { margin-right: 6px; }
         /* Stats bar */
         .kpi-bar {
@@ -189,30 +227,30 @@
             align-items: baseline;
             gap: 0;
             padding: 6px 12px;
-            background: #1e293b;
-            color: #e2e8f0;
+            background: var(--kb-primary-darker);
+            color: var(--kb-frost-blue);
             font-size: 12px;
             overflow-x: auto;
             white-space: nowrap;
             flex-shrink: 0;
         }
         .kpi-stat { display: inline-flex; align-items: baseline; gap: 4px; padding: 0 10px; }
-        .kpi-stat:not(:last-child) { border-right: 1px solid #475569; }
+        .kpi-stat:not(:last-child) { border-right: 1px solid var(--kb-primary-dark); }
         .kpi-value { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
-        .kpi-label { font-size: 10px; color: #94a3b8; }
+        .kpi-label { font-size: 10px; color: var(--kb-primary-light); }
         /* Toolbar */
         .toolbar {
             display: flex;
             align-items: center;
             padding: 8px 12px;
-            background: #fff;
-            border-bottom: 1px solid #e0e0e0;
+            background: var(--kb-white);
+            border-bottom: 1px solid var(--kb-base-lighter);
             gap: 12px;
         }
         .toolbar button {
-            background: #f3f4f6;
-            border: 1px solid #d1d5db;
-            color: #374151;
+            background: var(--kb-base-lightest);
+            border: 1px solid var(--kb-base-lighter);
+            color: var(--kb-base-darker);
             padding: 5px 10px;
             border-radius: 4px;
             cursor: pointer;
@@ -220,25 +258,25 @@
             font-weight: 500;
             transition: all 0.15s;
         }
-        .toolbar button:hover { background: #2563eb; color: white; border-color: #2563eb; }
+        .toolbar button:hover { background: var(--kb-primary); color: white; border-color: var(--kb-primary); }
         .toolbar .zoom-controls { display: flex; align-items: center; gap: 6px; }
-        .toolbar .zoom-controls span { font-size: 11px; color: #666; font-weight: 500; }
-        .toolbar input[type="range"] { width: 120px; accent-color: #2563eb; }
+        .toolbar .zoom-controls span { font-size: 11px; color: var(--kb-base); font-weight: 500; }
+        .toolbar input[type="range"] { width: 120px; accent-color: var(--kb-primary); }
         .toolbar .info {
             margin-left: auto;
             font-size: 11px;
-            color: #666;
-            background: #f3f4f6;
+            color: var(--kb-base);
+            background: var(--kb-base-lightest);
             padding: 3px 8px;
             border-radius: 4px;
         }
         /* Heatmap */
-        .heatmap-container { flex: 1; position: relative; overflow: hidden; background: #fff; }
+        .heatmap-container { flex: 1; position: relative; overflow: hidden; background: var(--kb-white); }
         #heatmap { display: block; }
         /* Tooltip */
         .tooltip {
             position: fixed;
-            background: #1f2937;
+            background: var(--kb-base-darker);
             color: white;
             padding: 10px 14px;
             border-radius: 6px;
@@ -250,22 +288,22 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             line-height: 1.5;
         }
-        .tooltip .gene-id { color: #60a5fa; font-weight: bold; font-size: 12px; }
-        .tooltip .func { color: #9ca3af; font-style: italic; margin-top: 4px; display: block; }
+        .tooltip .gene-id { color: var(--kb-primary-light); font-weight: bold; font-size: 12px; }
+        .tooltip .func { color: var(--kb-base-light); font-style: italic; margin-top: 4px; display: block; }
         .tooltip .tt-row { display: flex; justify-content: space-between; gap: 12px; }
-        .tooltip .tt-label { color: #9ca3af; }
-        .tooltip .tt-val { color: #e5e7eb; font-weight: 500; }
-        .tooltip .tt-highlight { color: #60a5fa; font-weight: 600; }
-        .tooltip .tt-section { margin-top: 6px; padding-top: 6px; border-top: 1px solid #374151; }
+        .tooltip .tt-label { color: var(--kb-base-light); }
+        .tooltip .tt-val { color: var(--kb-base-lightest); font-weight: 500; }
+        .tooltip .tt-highlight { color: var(--kb-primary-light); font-weight: 600; }
+        .tooltip .tt-section { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--kb-base-dark); }
         /* Gene Detail Panel */
         .gene-detail-panel {
-            position: absolute;
+            position: fixed;
             right: 0;
             top: 0;
             bottom: 0;
             width: 340px;
-            background: #fff;
-            border-left: 1px solid #e0e0e0;
+            background: var(--kb-white);
+            border-left: 1px solid var(--kb-base-lighter);
             box-shadow: -4px 0 12px rgba(0,0,0,0.08);
             overflow-y: auto;
             z-index: 500;
@@ -275,7 +313,7 @@
         .gene-detail-panel.open { display: block; }
         .gene-detail-header {
             padding: 12px 16px;
-            background: #2563eb;
+            background: var(--kb-primary);
             color: white;
             display: flex;
             justify-content: space-between;
@@ -296,20 +334,20 @@
             font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
-            color: #6b7280;
+            color: var(--kb-base);
             letter-spacing: 0.5px;
             margin-bottom: 6px;
             padding-bottom: 4px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--kb-base-lighter);
         }
         .detail-row { display: flex; justify-content: space-between; padding: 3px 0; }
-        .detail-label { color: #6b7280; }
-        .detail-value { color: #1f2937; font-weight: 500; text-align: right; max-width: 200px; word-break: break-word; }
+        .detail-label { color: var(--kb-base); }
+        .detail-value { color: var(--kb-base-darker); font-weight: 500; text-align: right; max-width: 200px; word-break: break-word; }
         .detail-func {
-            background: #f3f4f6;
+            background: var(--kb-base-lightest);
             padding: 8px;
             border-radius: 4px;
-            color: #374151;
+            color: var(--kb-base-darker);
             font-style: italic;
             line-height: 1.4;
         }
@@ -323,8 +361,8 @@
         }
         /* Genome selector */
         .genome-minimap {
-            background: #fff;
-            border-top: 1px solid #e0e0e0;
+            background: var(--kb-white);
+            border-top: 1px solid var(--kb-base-lighter);
             position: relative;
             height: 56px;
             user-select: none;
@@ -339,27 +377,27 @@
             position: absolute;
             top: 0;
             height: 36px;
-            background: rgba(37, 99, 235, 0.15);
-            border: 2px solid rgba(37, 99, 235, 0.6);
+            background: rgba(2, 109, 170, 0.15);
+            border: 2px solid rgba(2, 109, 170, 0.6);
             border-radius: 2px;
             cursor: grab;
             min-width: 6px;
             box-sizing: border-box;
             transition: background 0.1s;
         }
-        .minimap-viewport:hover { background: rgba(37, 99, 235, 0.25); }
-        .minimap-viewport.dragging { cursor: grabbing; background: rgba(37, 99, 235, 0.3); }
+        .minimap-viewport:hover { background: rgba(2, 109, 170, 0.25); }
+        .minimap-viewport.dragging { cursor: grabbing; background: rgba(2, 109, 170, 0.3); }
         .minimap-info {
             display: flex;
             justify-content: space-between;
             padding: 2px 8px;
             font-size: 10px;
-            color: #888;
+            color: var(--kb-base-light);
         }
         #position-info {
             font-size: 10px;
-            color: #666;
-            background: #f3f4f6;
+            color: var(--kb-base);
+            background: var(--kb-base-lightest);
             padding: 1px 6px;
             border-radius: 3px;
         }
@@ -368,10 +406,10 @@
             display: flex;
             gap: 16px;
             padding: 6px 12px;
-            background: #fafafa;
-            border-top: 1px solid #e0e0e0;
+            background: var(--kb-base-lightest);
+            border-top: 1px solid var(--kb-base-lighter);
             font-size: 10px;
-            color: #666;
+            color: var(--kb-base);
             flex-wrap: wrap;
         }
         .legend-item { display: flex; align-items: center; gap: 3px; cursor: help; position: relative; }
@@ -381,15 +419,15 @@
             border-radius: 2px;
             border: 1px solid rgba(0,0,0,0.1);
         }
-        .legend-label { font-weight: 500; margin-right: 6px; color: #444; }
+        .legend-label { font-weight: 500; margin-right: 6px; color: var(--kb-base-dark); }
         /* Track info tooltip */
         .track-item .info-btn {
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            border: 1px solid #d1d5db;
-            background: #f9fafb;
-            color: #9ca3af;
+            border: 1px solid var(--kb-base-lighter);
+            background: var(--kb-base-lightest);
+            color: var(--kb-base-light);
             font-size: 9px;
             cursor: help;
             display: flex;
@@ -398,11 +436,11 @@
             margin-right: 4px;
             flex-shrink: 0;
         }
-        .track-item .info-btn:hover { background: #2563eb; color: white; border-color: #2563eb; }
+        .track-item .info-btn:hover { background: var(--kb-primary); color: white; border-color: var(--kb-primary); }
         .track-desc-tooltip {
             position: fixed;
-            background: #1f2937;
-            color: #e5e7eb;
+            background: var(--kb-base-darker);
+            color: var(--kb-base-lightest);
             padding: 10px 14px;
             border-radius: 6px;
             font-size: 11px;
@@ -413,52 +451,52 @@
             line-height: 1.5;
             display: none;
         }
-        .track-desc-tooltip strong { color: #fff; }
+        .track-desc-tooltip strong { color: var(--kb-white); }
         .track-desc-tooltip .tt-section { margin-top: 6px; }
-        .track-desc-tooltip .tt-label { color: #93c5fd; font-weight: 600; display: block; margin-top: 5px; }
+        .track-desc-tooltip .tt-label { color: var(--kb-primary-light); font-weight: 600; display: block; margin-top: 5px; }
         .track-desc-tooltip .tt-colors { display: flex; gap: 6px; margin-top: 3px; align-items: center; font-size: 10px; }
         .track-desc-tooltip .tt-swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
         /* Tree View */
-        .tree-container { flex: 1; overflow: auto; background: #fff; position: relative; }
+        .tree-container { flex: 1; overflow: auto; background: var(--kb-white); position: relative; }
         .tree-container svg { display: block; }
-        .tree-toolbar { padding: 8px 12px; background: #fff; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; gap: 12px; font-size: 11px; color: #666; }
+        .tree-toolbar { padding: 8px 12px; background: var(--kb-white); border-bottom: 1px solid var(--kb-base-lighter); display: flex; align-items: center; gap: 12px; font-size: 11px; color: var(--kb-base); }
         .tree-leaf { cursor: pointer; }
-        .tree-leaf:hover text { fill: #2563eb !important; }
-        .tree-leaf.user-genome text { fill: #dc2626; font-weight: 700; }
+        .tree-leaf:hover text { fill: var(--kb-primary) !important; }
+        .tree-leaf.user-genome text { fill: var(--kb-cherry-red); font-weight: 700; }
         .tree-tooltip {
-            position: fixed; background: #1f2937; color: white;
+            position: fixed; background: var(--kb-base-darker); color: white;
             padding: 10px 14px; border-radius: 6px; font-size: 11px;
             pointer-events: none; z-index: 1000; max-width: 350px;
             display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); line-height: 1.5;
         }
         .stat-toggle { display: flex; align-items: center; gap: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
-        .stat-toggle:hover { background: #f5f7fa; }
-        .stat-toggle input { accent-color: #2563eb; }
-        .stat-bar-label { font-size: 9px; fill: #666; }
+        .stat-toggle:hover { background: var(--kb-base-lightest); }
+        .stat-toggle input { accent-color: var(--kb-primary); }
+        .stat-bar-label { font-size: 9px; fill: var(--kb-base); }
         /* Cluster View */
-        .cluster-container { flex: 1; position: relative; overflow: hidden; background: #fff; }
+        .cluster-container { flex: 1; position: relative; overflow: hidden; background: var(--kb-white); }
         #cluster-canvas { display: block; }
-        .cluster-toolbar { padding: 8px 12px; background: #fff; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; gap: 12px; font-size: 11px; }
-        .cluster-legend { display: flex; gap: 16px; padding: 6px 12px; background: #fafafa; border-top: 1px solid #e0e0e0; font-size: 10px; color: #666; flex-wrap: wrap; flex-shrink: 0; }
+        .cluster-toolbar { padding: 8px 12px; background: var(--kb-white); border-bottom: 1px solid var(--kb-base-lighter); display: flex; align-items: center; gap: 12px; font-size: 11px; }
+        .cluster-legend { display: flex; gap: 16px; padding: 6px 12px; background: var(--kb-base-lightest); border-top: 1px solid var(--kb-base-lighter); font-size: 10px; color: var(--kb-base); flex-wrap: wrap; flex-shrink: 0; }
         .cluster-legend .legend-item { display: flex; align-items: center; gap: 3px; }
-        .cluster-select { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px; background: #fff; }
+        .cluster-select { padding: 4px 8px; border: 1px solid var(--kb-base-lighter); border-radius: 4px; font-size: 11px; background: var(--kb-white); }
         /* Metabolic Map View */
-        #metabolic-container { flex: 1; position: relative; overflow: hidden; background: #fff; }
+        #metabolic-container { flex: 1; position: relative; overflow: hidden; background: var(--kb-white); }
         #metabolic-container svg { width: 100%; height: 100%; }
-        .metabolic-toolbar { padding: 8px 12px; background: #fff; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; gap: 12px; font-size: 11px; }
-        .metabolic-legend { padding: 8px 12px; font-size: 10px; color: #555; line-height: 1.8; }
+        .metabolic-toolbar { padding: 8px 12px; background: var(--kb-white); border-bottom: 1px solid var(--kb-base-lighter); display: flex; align-items: center; gap: 12px; font-size: 11px; }
+        .metabolic-legend { padding: 8px 12px; font-size: 10px; color: var(--kb-base-dark); line-height: 1.8; }
         .metabolic-legend .legend-row { display: flex; align-items: center; gap: 6px; }
         .metabolic-legend .legend-swatch { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; border: 1px solid rgba(0,0,0,0.1); }
         .metabolic-legend .gradient-bar { height: 12px; width: 100px; border-radius: 2px; border: 1px solid rgba(0,0,0,0.1); }
-        .rxn-detail { padding: 8px 12px; font-size: 11px; color: #555; line-height: 1.6; }
-        .rxn-detail .rxn-id { font-weight: 600; color: #1f2937; font-size: 12px; margin-bottom: 4px; }
-        .rxn-detail .rxn-eq { background: #f3f4f6; padding: 6px 8px; border-radius: 4px; font-size: 10px; margin: 6px 0; line-height: 1.5; word-break: break-word; }
+        .rxn-detail { padding: 8px 12px; font-size: 11px; color: var(--kb-base-dark); line-height: 1.6; }
+        .rxn-detail .rxn-id { font-weight: 600; color: var(--kb-base-darker); font-size: 12px; margin-bottom: 4px; }
+        .rxn-detail .rxn-eq { background: var(--kb-base-lightest); padding: 6px 8px; border-radius: 4px; font-size: 10px; margin: 6px 0; line-height: 1.5; word-break: break-word; }
         .rxn-detail .rxn-row { display: flex; justify-content: space-between; padding: 2px 0; }
-        .rxn-detail .rxn-label { color: #6b7280; }
-        .rxn-detail .rxn-val { font-weight: 500; color: #1f2937; }
-        .rxn-gene-link { color: #2563eb; cursor: pointer; text-decoration: underline; }
-        .rxn-gene-link:hover { color: #1d4ed8; }
-        .metabolic-loading { display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af; font-size: 14px; }
+        .rxn-detail .rxn-label { color: var(--kb-base); }
+        .rxn-detail .rxn-val { font-weight: 500; color: var(--kb-base-darker); }
+        .rxn-gene-link { color: var(--kb-primary); cursor: pointer; text-decoration: underline; }
+        .rxn-gene-link:hover { color: var(--kb-primary-dark); }
+        .metabolic-loading { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--kb-base-light); font-size: 14px; }
     </style>
 </head>
 <body>
@@ -466,6 +504,7 @@
     <div class="kpi-bar" id="kpi-bar"></div>
     <!-- Tab Bar -->
     <div class="tab-bar">
+        <img src="kbase_logo.png" alt="KBase" style="height: 28px; margin-right: 12px; align-self: center;">
         <button class="tab-btn active" data-tab="tracks" onclick="switchTab('tracks')">Tracks</button>
         <button class="tab-btn" data-tab="tree" onclick="switchTab('tree')">Tree</button>
         <button class="tab-btn" data-tab="cluster" onclick="switchTab('cluster')">Cluster</button>
@@ -536,14 +575,6 @@
                 <canvas id="heatmap"></canvas>
                 <div class="tooltip" id="tooltip"></div>
                 <div class="track-desc-tooltip" id="track-desc-tooltip"></div>
-                <!-- Gene Detail Panel -->
-                <div class="gene-detail-panel" id="gene-detail-panel">
-                    <div class="gene-detail-header">
-                        <h3 id="detail-title">Gene Details</h3>
-                        <button class="gene-detail-close" onclick="closeDetail()">&times;</button>
-                    </div>
-                    <div class="gene-detail-body" id="detail-body"></div>
-                </div>
             </div>
             <!-- Legend -->
             <div class="legend" id="legend"></div>
@@ -575,7 +606,7 @@
                     <span>Tree Info</span>
                     <span class="toggle-icon">&#9660;</span>
                 </div>
-                <div style="padding: 8px 12px; font-size: 11px; color: #666; line-height: 1.6;" id="tree-info">
+                <div style="padding: 8px 12px; font-size: 11px; color: var(--kb-base); line-height: 1.6;" id="tree-info">
                     Loading tree data...
                 </div>
             </div>
@@ -603,7 +634,7 @@
                         <option value="features">Gene Features</option>
                         <option value="presence">Presence/Absence</option>
                     </select>
-                    <div style="font-size: 10px; color: #888; margin-top: 4px;" id="cluster-embed-desc">
+                    <div style="font-size: 10px; color: var(--kb-base-light); margin-top: 4px;" id="cluster-embed-desc">
                         UMAP of conservation, consistency scores, annotation counts, protein length
                     </div>
                 </div>
@@ -643,7 +674,7 @@
                     <span>Info</span>
                     <span class="toggle-icon">&#9660;</span>
                 </div>
-                <div style="padding: 8px 12px; font-size: 11px; color: #666; line-height: 1.6;" id="cluster-info">
+                <div style="padding: 8px 12px; font-size: 11px; color: var(--kb-base); line-height: 1.6;" id="cluster-info">
                     Loading cluster data...
                 </div>
             </div>
@@ -651,8 +682,8 @@
         <div class="main">
             <div class="cluster-toolbar" id="cluster-toolbar">
                 <span id="cluster-toolbar-info">UMAP projection of 4,617 genes</span>
-                <span id="cluster-zoom-info" style="margin-left:8px; font-size:11px; color:#888;"></span>
-                <button id="cluster-reset-zoom" style="margin-left:auto; padding:3px 10px; font-size:11px; border:1px solid #d1d5db; border-radius:4px; background:#fff; color:#555; cursor:pointer; display:none;" onclick="resetClusterZoom()">Reset Zoom</button>
+                <span id="cluster-zoom-info" style="margin-left:8px; font-size:11px; color:#9D9389;"></span>
+                <button id="cluster-reset-zoom" style="margin-left:auto; padding:3px 10px; font-size:11px; border:1px solid var(--kb-base-lighter); border-radius:4px; background:var(--kb-white); color:var(--kb-base-dark); cursor:pointer; display:none;" onclick="resetClusterZoom()">Reset Zoom</button>
             </div>
             <div class="cluster-container">
                 <canvas id="cluster-canvas"></canvas>
@@ -706,7 +737,7 @@
                     <span>Stats</span>
                     <span class="toggle-icon">&#9660;</span>
                 </div>
-                <div style="padding: 8px 12px; font-size: 11px; color: #666; line-height: 1.6;" id="metabolic-stats">
+                <div style="padding: 8px 12px; font-size: 11px; color: var(--kb-base); line-height: 1.6;" id="metabolic-stats">
                     Loading...
                 </div>
             </div>
@@ -716,7 +747,7 @@
                     <span class="toggle-icon">&#9660;</span>
                 </div>
                 <div class="rxn-detail" id="metabolic-rxn-detail">
-                    <span style="color:#9ca3af;">Click a reaction on the map to see details</span>
+                    <span style="color:#9D9389;">Click a reaction on the map to see details</span>
                 </div>
             </div>
         </div>
@@ -783,7 +814,7 @@
           desc: '<strong>Average Function Consistency Score</strong>' +
             '<span class="tt-label">What it shows:</span>How well this gene\'s functional annotation agrees with other genes in the same pangenome cluster, averaged across all annotation sources (RAST, KO, GO, EC, Bakta).' +
             '<span class="tt-label">How it\'s computed:</span>For each annotation source, the pipeline compares this gene\'s annotation to all other genes in the same cluster. If all genes share the same annotation, consistency = 1.0. If this gene has a unique annotation, consistency approaches 0. The average is taken across all available sources.' +
-            '<div class="tt-colors"><span class="tt-swatch" style="background:#22c55e"></span> 1.0 = all genes in cluster agree &nbsp; <span class="tt-swatch" style="background:#fbbf24"></span> 0.5 = mixed &nbsp; <span class="tt-swatch" style="background:#ef4444"></span> 0.0 = disagree &nbsp; <span class="tt-swatch" style="background:#e5e7eb"></span> N/A = no cluster</div>' +
+            '<div class="tt-colors"><span class="tt-swatch" style="background:#22c55e"></span> 1.0 = all genes in cluster agree &nbsp; <span class="tt-swatch" style="background:#f59e0b"></span> 0.5 = mixed &nbsp; <span class="tt-swatch" style="background:#ef4444"></span> 0.0 = disagree &nbsp; <span class="tt-swatch" style="background:#e5e7eb"></span> N/A = no cluster</div>' +
             '<span class="tt-label">Biological insight:</span>Low consistency (red) genes are especially interesting: they may have novel functions, incorrect annotations, or represent recently diverged genes.' },
         { id: 'rast_cons', name: 'RAST Consistency', field: F.RAST_CONS, type: 'consistency', enabled: false,
           desc: '<strong>RAST Function Consistency</strong>' +
@@ -987,7 +1018,7 @@
                 return `rgb(${Math.floor(239 - 205 * ((v - 0.5) * 2))}, ${Math.floor(248 - 52 * ((v - 0.5) * 2))}, 68)`;
             }
         },
-        placeholder: () => '#f3f4f6'
+        placeholder: () => '#F2EFEB'
     };
 
     // === STATE ===
@@ -1138,6 +1169,8 @@
         const lowCons = genes.filter(g => g[F.AVG_CONS] >= 0 && g[F.AVG_CONS] < 0.5).length;
 
         document.getElementById('kpi-bar').innerHTML = `
+            <span class="kpi-stat" style="font-weight:700; font-style:italic;">${CONFIG.organism || ''}</span>
+            <span class="kpi-stat"><span class="kpi-label">${CONFIG.genome_id || ''}</span></span>
             <span class="kpi-stat"><span class="kpi-value">${total}</span><span class="kpi-label">genes</span></span>
             <span class="kpi-stat"><span class="kpi-value">${core}</span><span class="kpi-label">core</span></span>
             <span class="kpi-stat"><span class="kpi-value">${accessory}</span><span class="kpi-label">accessory</span></span>
@@ -1202,6 +1235,30 @@
 
     let activeView = null;
 
+    let currentSortLabel = null;
+
+    function updateToolbarInfo() {
+        const info = document.getElementById('info');
+        const parts = [];
+        if (activeView) {
+            const view = ANALYSIS_VIEWS.find(v => v.id === activeView);
+            if (view) parts.push('Showing: ' + view.name);
+        }
+        if (currentSortLabel) {
+            parts.push('Sorted by: ' + currentSortLabel);
+        }
+        if (parts.length) {
+            info.textContent = parts.join('  |  ');
+        } else {
+            info.textContent = `${genes.length} genes (genome order)`;
+        }
+    }
+
+    function deactivateAnalysisView() {
+        activeView = null;
+        TRACKS.forEach(t => { t.enabled = ['order', 'strand', 'conservation', 'pan_category', 'avg_cons'].includes(t.id); });
+    }
+
     function renderAnalysisViews() {
         const container = document.getElementById('analysis-views');
         container.innerHTML = ANALYSIS_VIEWS.map((v, i) =>
@@ -1217,17 +1274,14 @@
                 if (e.target.classList.contains('av-info-btn')) return;
                 const viewId = btn.dataset.view;
                 if (activeView === viewId) {
-                    // Deactivate: restore default tracks
-                    activeView = null;
-                    TRACKS.forEach(t => { t.enabled = ['order', 'strand', 'conservation', 'pan_category', 'avg_cons'].includes(t.id); });
+                    deactivateAnalysisView();
                 } else {
                     const view = ANALYSIS_VIEWS.find(v => v.id === viewId);
                     activeView = viewId;
-                    // Disable all tracks, then enable only this view's tracks
                     TRACKS.forEach(t => { t.enabled = view.tracks.includes(t.id); });
-                    // Apply sort if specified
                     if (view.sort) applySortPreset(view.sort);
                 }
+                updateToolbarInfo();
                 renderTrackList();
                 renderAnalysisViews();
                 render();
@@ -1317,8 +1371,9 @@
             sortedIndices = [...Array(genes.length).keys()].sort((a, b) => preset.fn(a, b, genes));
         }
         currentSort = preset.id;
-        document.getElementById('info').textContent = `Sorted by: ${preset.name}`;
+        currentSortLabel = (preset.id === 'genome') ? null : preset.name;
         renderSortPresets();
+        updateToolbarInfo();
         render();
         renderMinimap();
     }
@@ -1368,7 +1423,7 @@
         title.textContent = `Gene ${gene[F.FID]}`;
 
         const consBar = (val) => {
-            if (val < 0) return '<span style="color:#9ca3af">N/A</span>';
+            if (val < 0) return '<span style="color:#9D9389">N/A</span>';
             const color = COLORS.consistency(val);
             return `<span class="cons-bar" style="background:${color}"></span>${val.toFixed(4)}`;
         };
@@ -1448,8 +1503,9 @@
             return vb - va;
         });
         currentSort = null;
-        document.getElementById('info').textContent = `Sorted by: ${track.name}`;
+        currentSortLabel = track.name;
         renderSortPresets();
+        updateToolbarInfo();
         render();
         renderMinimap();
     }
@@ -1457,8 +1513,9 @@
     function resetSort() {
         sortedIndices = genes.map((_, i) => i);
         currentSort = 'genome';
-        document.getElementById('info').textContent = `${genes.length} genes (genome order)`;
+        currentSortLabel = null;
         renderSortPresets();
+        updateToolbarInfo();
         render();
         renderMinimap();
     }
@@ -1565,7 +1622,7 @@
         minimapCtx.scale(dpr, dpr);
 
         // Clear
-        minimapCtx.fillStyle = '#f8fafc';
+        minimapCtx.fillStyle = '#F2EFEB';
         minimapCtx.fillRect(0, 0, displayW, displayH);
 
         // Pick the best track to visualize: prefer conservation, then core/accessory, then first enabled
@@ -1754,7 +1811,7 @@
 
         const enabledTracks = TRACKS.filter(t => t.enabled);
         if (enabledTracks.length === 0) {
-            ctx.fillStyle = '#9ca3af';
+            ctx.fillStyle = '#9D9389';
             ctx.font = '14px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('Select tracks from the sidebar to display', canvas.width / 2, canvas.height / 2);
@@ -1794,9 +1851,9 @@
             const y = 5 + ti * trackHeight;
 
             // Track label
-            ctx.fillStyle = '#f8fafc';
+            ctx.fillStyle = '#F2EFEB';
             ctx.fillRect(0, y, labelWidth - 5, trackHeight - 2);
-            ctx.fillStyle = '#374151';
+            ctx.fillStyle = '#3E3832';
             ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
             ctx.fillText(track.name, 8, y + trackHeight / 2 + 4);
 
@@ -1988,10 +2045,10 @@
             <div><strong>${d.stats.n_genomes}</strong> genomes (${d.stats.n_reference} reference + user)</div>
             <div><strong>${d.stats.n_clusters}</strong> pangenome clusters used</div>
             <div style="margin-top:6px;">Jaccard distance range: <strong>${d.stats.min_distance.toFixed(4)}</strong> - <strong>${d.stats.max_distance.toFixed(4)}</strong></div>
-            <div style="margin-top:8px; padding-top:6px; border-top:1px solid #e0e0e0; color:#dc2626; font-weight:600;">Your genome: ${d.user_genome_id}</div>
-            <div style="color:#666;">${userStats.n_genes || '?'} genes, ${userStats.n_clusters || '?'} clusters, ${userStats.core_pct ? (userStats.core_pct*100).toFixed(1)+'% core' : '?'}</div>
-            <div style="margin-top:8px; padding-top:6px; border-top:1px solid #e0e0e0; font-size:10px; color:#999; line-height:1.5;">
-                <strong style="color:#666;">How to read:</strong> UPGMA tree based on Jaccard distance of pangenome cluster presence/absence. Genomes sharing more clusters are closer. Branch length = distance at which two groups merge. Hover leaf labels for genome details.
+            <div style="margin-top:8px; padding-top:6px; border-top:1px solid #DED5CB; color:#D2232A; font-weight:600;">Your genome: ${d.user_genome_id}</div>
+            <div style="color:#6A6158;">${userStats.n_genes || '?'} genes, ${userStats.n_clusters || '?'} clusters, ${userStats.core_pct ? (userStats.core_pct*100).toFixed(1)+'% core' : '?'}</div>
+            <div style="margin-top:8px; padding-top:6px; border-top:1px solid #DED5CB; font-size:10px; color:#9D9389; line-height:1.5;">
+                <strong style="color:#6A6158;">How to read:</strong> UPGMA tree based on Jaccard distance of pangenome cluster presence/absence. Genomes sharing more clusters are closer. Branch length = distance at which two groups merge. Hover leaf labels for genome details.
             </div>
         `;
     }
@@ -2076,7 +2133,7 @@
             if (dv <= maxDist) {
                 const sx = labelWidth + xScale(dv);
                 svg += `<line x1="${sx}" y1="${marginTop - 5}" x2="${sx}" y2="${scaleY}" stroke="#f1f5f9" stroke-width="1" stroke-dasharray="4,4"/>`;
-                svg += `<text x="${sx}" y="${scaleY + 12}" text-anchor="middle" font-size="9" fill="#94a3b8">J=${dv}</text>`;
+                svg += `<text x="${sx}" y="${scaleY + 12}" text-anchor="middle" font-size="9" fill="#9D9389">J=${dv}</text>`;
             }
         });
 
@@ -2135,7 +2192,7 @@
 
             // Highlight band for user genome
             if (isUser) {
-                svg += `<rect x="0" y="${y - leafH/2}" width="${totalW}" height="${leafH}" fill="#fef2f2" opacity="0.5"/>`;
+                svg += `<rect x="0" y="${y - leafH/2}" width="${totalW}" height="${leafH}" fill="#DFEEF6" opacity="0.5"/>`;
             }
 
             // Label (right-aligned to labelWidth)
@@ -2155,7 +2212,7 @@
                     const w = (val / statMaxes[s.id]) * (barW - 6);
                     const bx = barStart + si * barW;
                     // Background track
-                    svg += `<rect x="${bx}" y="${y - 6}" width="${barW - 6}" height="12" fill="#f1f5f9" rx="1"/>`;
+                    svg += `<rect x="${bx}" y="${y - 6}" width="${barW - 6}" height="12" fill="#F2EFEB" rx="1"/>`;
                     // Value bar
                     svg += `<rect x="${bx}" y="${y - 6}" width="${w}" height="12" fill="${s.color}" opacity="0.7" rx="1"/>`;
                 });
@@ -2173,7 +2230,7 @@
         }
 
         // Scale axis label
-        svg += `<text x="${labelWidth + treeWidth/2}" y="${totalH - 2}" text-anchor="middle" font-size="9" fill="#94a3b8">Jaccard distance (sqrt scale)</text>`;
+        svg += `<text x="${labelWidth + treeWidth/2}" y="${totalH - 2}" text-anchor="middle" font-size="9" fill="#9D9389">Jaccard distance (sqrt scale)</text>`;
 
         svg += '</svg>';
         container.innerHTML = svg;
@@ -2188,12 +2245,12 @@
                 const tax = meta.tax || {};
                 const ani = meta.ani_to_user != null ? meta.ani_to_user + '%' : 'N/A';
                 tooltip.innerHTML = `
-                    <div style="font-weight:700; color:#60a5fa; margin-bottom:4px;">${gid}</div>
+                    <div style="font-weight:700; color:#66B1DB; margin-bottom:4px;">${gid}</div>
                     <div>${tax.species || 'Unknown species'}</div>
-                    <div style="color:#9ca3af; font-size:10px;">${[tax.phylum, tax.class, tax.order, tax.family, tax.genus].filter(Boolean).join(' > ')}</div>
-                    <div style="margin-top:6px;"><span style="color:#9ca3af;">Features:</span> ${meta.n_features || '?'} | <span style="color:#9ca3af;">Contigs:</span> ${meta.n_contigs || '?'}</div>
-                    <div><span style="color:#9ca3af;">Genes:</span> ${stats.n_genes || '?'} | <span style="color:#9ca3af;">Clusters:</span> ${stats.n_clusters || '?'} | <span style="color:#9ca3af;">Core:</span> ${stats.core_pct != null ? (stats.core_pct * 100).toFixed(1) + '%' : '?'}</div>
-                    <div><span style="color:#9ca3af;">ANI to user:</span> ${ani}</div>
+                    <div style="color:#9D9389; font-size:10px;">${[tax.phylum, tax.class, tax.order, tax.family, tax.genus].filter(Boolean).join(' > ')}</div>
+                    <div style="margin-top:6px;"><span style="color:#9D9389;">Features:</span> ${meta.n_features || '?'} | <span style="color:#9D9389;">Contigs:</span> ${meta.n_contigs || '?'}</div>
+                    <div><span style="color:#9D9389;">Genes:</span> ${stats.n_genes || '?'} | <span style="color:#9D9389;">Clusters:</span> ${stats.n_clusters || '?'} | <span style="color:#9D9389;">Core:</span> ${stats.core_pct != null ? (stats.core_pct * 100).toFixed(1) + '%' : '?'}</div>
+                    <div><span style="color:#9D9389;">ANI to user:</span> ${ani}</div>
                 `;
                 tooltip.style.display = 'block';
                 const rect = leaf.getBoundingClientRect();
@@ -2223,15 +2280,15 @@
             const unk = genes.filter(g => g[F.PAN_CAT] === 0).length;
             document.getElementById('cluster-info').innerHTML = `
                 <div><strong>${genes.length.toLocaleString()}</strong> genes plotted</div>
-                <div style="font-size:10px; color:#888; margin-top:2px;">${core} core, ${acc} accessory, ${unk} unknown</div>
-                <div style="margin-top:8px; font-size:10px; color:#999; line-height:1.5;">
-                    <strong style="color:#666;">How to read:</strong> Each dot is one gene. Genes that are close together have similar properties. Change <em>Embedding</em> to explore different similarity measures. Change <em>Color By</em> to highlight patterns. Hover for gene info, click for full details.
+                <div style="font-size:10px; color:#9D9389; margin-top:2px;">${core} core, ${acc} accessory, ${unk} unknown</div>
+                <div style="margin-top:8px; font-size:10px; color:#9D9389; line-height:1.5;">
+                    <strong style="color:#6A6158;">How to read:</strong> Each dot is one gene. Genes that are close together have similar properties. Change <em>Embedding</em> to explore different similarity measures. Change <em>Color By</em> to highlight patterns. Hover for gene info, click for full details.
                 </div>
-                <div style="margin-top:6px; font-size:10px; color:#999; line-height:1.5;">
-                    <strong style="color:#666;">Gene Features:</strong> UMAP of 23 gene properties (conservation, consistency scores, annotation counts, protein length). Groups genes with similar functional profiles.
+                <div style="margin-top:6px; font-size:10px; color:#9D9389; line-height:1.5;">
+                    <strong style="color:#6A6158;">Gene Features:</strong> UMAP of 23 gene properties (conservation, consistency scores, annotation counts, protein length). Groups genes with similar functional profiles.
                 </div>
-                <div style="margin-top:4px; font-size:10px; color:#999; line-height:1.5;">
-                    <strong style="color:#666;">Presence/Absence:</strong> UMAP of binary cluster membership across ${(CONFIG && CONFIG.n_ref_genomes) || 35} reference genomes. Groups genes with similar phylogenetic distribution.
+                <div style="margin-top:4px; font-size:10px; color:#9D9389; line-height:1.5;">
+                    <strong style="color:#6A6158;">Presence/Absence:</strong> UMAP of binary cluster membership across ${(CONFIG && CONFIG.n_ref_genomes) || 35} reference genomes. Groups genes with similar phylogenetic distribution.
                 </div>
             `;
         } catch (e) {
@@ -2664,7 +2721,7 @@
                     <div class="legend-row"><div class="legend-swatch" style="background:#3b82f6"></div> Reverse flux</div>
                     <div class="legend-row"><div class="legend-swatch" style="background:#f3f4f6"></div> Zero flux</div>
                     <div class="legend-row"><div class="legend-swatch" style="background:#ef4444"></div> Forward flux</div>
-                    <div class="legend-row" style="margin-top:2px; color:#999; font-size:9px">FBA solution on ${media} media</div>`;
+                    <div class="legend-row" style="margin-top:2px; color:#9D9389; font-size:9px">FBA solution on ${media} media</div>`;
                 break;
             case 'class_rich': case 'class_min':
                 for (const cls of FLUX_CLASSES) {
@@ -2694,14 +2751,14 @@
                 <div><strong>${stats.total_reactions}</strong> user genome reactions</div>
                 <div style="margin-top:4px;"><strong>${withData}</strong> shown on map (of ${totalOnMap} on map)</div>
                 <div><strong>${notOnMap}</strong> not on map</div>
-                <div style="margin-top:6px; border-top:1px solid #eee; padding-top:6px;">
+                <div style="margin-top:6px; border-top:1px solid #DED5CB; padding-top:6px;">
                     <div>Active (rich): <strong>${stats.active_rich}</strong></div>
                     <div>Active (minimal): <strong>${stats.active_min}</strong></div>
                     <div>Essential (rich): <strong>${stats.essential_rich}</strong></div>
                     <div>Essential (minimal): <strong>${stats.essential_min}</strong></div>
                     <div>Blocked (rich): <strong>${stats.blocked_rich}</strong></div>
                 </div>
-                <div style="margin-top:4px; font-size:10px; color:#999;">
+                <div style="margin-top:4px; font-size:10px; color:#9D9389;">
                     Data from ${reactionsData.n_genomes} genomes
                 </div>
             `;
@@ -2776,7 +2833,7 @@
         if (!rxn) {
             el.innerHTML = `
                 <div class="rxn-id">${rxnId}</div>
-                <div style="color:#9ca3af;">No data for this reaction in user genome</div>`;
+                <div style="color:#9D9389;">No data for this reaction in user genome</div>`;
             return;
         }
 
@@ -2789,7 +2846,7 @@
                 return `<span class="rxn-gene-link" onclick="showGeneDetail(${indices[0]})">${match}</span>`;
             }
             return match;
-        }) : '<span style="color:#9ca3af">No gene assignment</span>';
+        }) : '<span style="color:#9D9389">No gene assignment</span>';
 
         const classColor = (cls) => `<span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:${FLUX_CLASS_COLORS[cls] || '#ddd'}; margin-right:4px;"></span>${FLUX_CLASS_LABELS[cls] || cls}`;
 
@@ -2799,14 +2856,14 @@
             <div class="rxn-row"><span class="rxn-label">Directionality</span><span class="rxn-val">${rxn.directionality}</span></div>
             <div class="rxn-row"><span class="rxn-label">Conservation</span><span class="rxn-val">${(rxn.conservation * 100).toFixed(0)}% (${Math.round(rxn.conservation * reactionsData.n_genomes)}/${reactionsData.n_genomes})</span></div>
             <div class="rxn-row"><span class="rxn-label">Gapfilling</span><span class="rxn-val">${rxn.gapfilling === 'none' ? 'No' : rxn.gapfilling}</span></div>
-            <div style="margin-top:6px; padding-top:6px; border-top:1px solid #eee;">
+            <div style="margin-top:6px; padding-top:6px; border-top:1px solid #DED5CB;">
                 <div class="rxn-row"><span class="rxn-label">Flux (rich)</span><span class="rxn-val">${rxn.flux_rich.toFixed(4)}</span></div>
                 <div class="rxn-row"><span class="rxn-label">Class (rich)</span><span class="rxn-val">${classColor(rxn.class_rich)}</span></div>
                 <div class="rxn-row"><span class="rxn-label">Flux (minimal)</span><span class="rxn-val">${rxn.flux_min.toFixed(4)}</span></div>
                 <div class="rxn-row"><span class="rxn-label">Class (minimal)</span><span class="rxn-val">${classColor(rxn.class_min)}</span></div>
             </div>
-            <div style="margin-top:6px; padding-top:6px; border-top:1px solid #eee;">
-                <div style="font-size:10px; font-weight:600; color:#6b7280; margin-bottom:4px;">GENES</div>
+            <div style="margin-top:6px; padding-top:6px; border-top:1px solid #DED5CB;">
+                <div style="font-size:10px; font-weight:600; color:#6A6158; margin-bottom:4px;">GENES</div>
                 <div style="font-size:11px; line-height:1.6; word-break:break-word;">${geneLinks}</div>
             </div>
         `;
@@ -2815,5 +2872,13 @@
     // Start
     loadData();
     </script>
+    <!-- Gene Detail Panel (shared across all tabs) -->
+    <div class="gene-detail-panel" id="gene-detail-panel">
+        <div class="gene-detail-header">
+            <h3 id="detail-title">Gene Details</h3>
+            <button class="gene-detail-close" onclick="closeDetail()">&times;</button>
+        </div>
+        <div class="gene-detail-body" id="detail-body"></div>
+    </div>
 </body>
 </html>
