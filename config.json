@@ -21,7 +21,8 @@
     "AGREEMENT": 24, "CLUSTER_SIZE": 25, "N_MODULES": 26,
     "EC_MAP_CONS": 27, "PROT_LEN": 28,
     "REACTIONS": 29, "RICH_FLUX": 30, "RICH_CLASS": 31, "MIN_FLUX": 32,
-    "MIN_CLASS": 33, "PSORTB_NEW": 34, "ESSENTIALITY": 35
+    "MIN_CLASS": 33, "PSORTB_NEW": 34, "ESSENTIALITY": 35,
+    "N_PHENOTYPES": 36, "N_FITNESS": 37
   },
   "categories": {
     "localization": ["Cytoplasmic", "CytoMembrane", "Periplasmic", "OuterMembrane", "Extracellular", "Unknown"],
@@ -57,7 +58,9 @@
     { "id": "min_flux", "name": "Flux (minimal media)", "field": "MIN_FLUX", "type": "sequential", "enabled": false },
     { "id": "rich_class", "name": "Flux Class (rich)", "field": "RICH_CLASS", "type": "categorical", "enabled": false, "categories": ["essential", "variable", "blocked"] },
     { "id": "min_class", "name": "Flux Class (minimal)", "field": "MIN_CLASS", "type": "categorical", "enabled": false, "categories": ["essential", "variable", "blocked"] },
-    { "id": "essentiality", "name": "Gene Essentiality", "field": "ESSENTIALITY", "type": "sequential", "enabled": false }
+    { "id": "essentiality", "name": "Gene Essentiality", "field": "ESSENTIALITY", "type": "sequential", "enabled": false },
+    { "id": "n_phenotypes", "name": "# Phenotypes", "field": "N_PHENOTYPES", "type": "sequential", "enabled": false },
+    { "id": "n_fitness", "name": "# Fitness Scores", "field": "N_FITNESS", "type": "sequential", "enabled": false }
   ],
   "placeholder_tracks": [
     { "id": "neighborhood", "name": "Neighborhood Conservation*", "pending": true }

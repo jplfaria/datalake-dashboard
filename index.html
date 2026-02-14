@@ -941,14 +941,16 @@
           desc: '<strong>Reaction Classification - Rich Media* (Pending)</strong>' +
             '<span class="tt-label">Planned feature:</span>Same as minimal media reaction classification but under rich media conditions. Comparing minimal vs. rich reveals condition-dependent essential genes.' +
             '<span class="tt-label">Status:</span>Requires FVA results from metabolic modeling.' },
-        { id: 'n_phenotypes', name: '# Phenotypes*', field: -1, type: 'placeholder', enabled: false,
-          desc: '<strong># Linked Phenotypes* (Pending)</strong>' +
-            '<span class="tt-label">Planned feature:</span>Number of phenotypes (growth/no-growth on specific media) that are linked to this gene through the metabolic model. High counts indicate genes involved in many metabolic pathways.' +
-            '<span class="tt-label">Status:</span>Requires gene-phenotype mapping via model analysis.' },
-        { id: 'n_fitness', name: '# Fitness Scores*', field: -1, type: 'placeholder', enabled: false,
-          desc: '<strong># Fitness Scores* (Pending)</strong>' +
-            '<span class="tt-label">Planned feature:</span>Number of experimental fitness scores above significance threshold from high-throughput mutant fitness assays (e.g., RB-TnSeq). Indicates how many conditions this gene affects growth in.' +
-            '<span class="tt-label">Status:</span>Requires integration with fitness.py pipeline.' },
+        { id: 'n_phenotypes', name: '# Phenotypes', field: 'N_PHENOTYPES', type: 'sequential', enabled: false,
+          desc: '<strong># Linked Phenotypes</strong>' +
+            '<span class="tt-label">What it shows:</span>Number of distinct phenotypes (growth conditions) linked to this gene through the metabolic model. Each phenotype represents a growth/no-growth prediction on a specific media composition.' +
+            '<span class="tt-label">How to read it:</span>Light (0-2) = gene involved in few phenotypes. Dark (20+) = gene involved in many metabolic pathways/conditions.' +
+            '<span class="tt-label">Biological insight:</span>High phenotype counts indicate genes that are functionally important across many conditions - often central metabolism genes. Low counts suggest specialized/condition-specific roles.' },
+        { id: 'n_fitness', name: '# Fitness Scores', field: 'N_FITNESS', type: 'sequential', enabled: false,
+          desc: '<strong># Fitness Scores</strong>' +
+            '<span class="tt-label">What it shows:</span>Number of experimental fitness scores from high-throughput mutant fitness assays where model predictions match experimental data (fitness_match=yes). Based on RB-TnSeq and similar Tn-seq datasets.' +
+            '<span class="tt-label">How to read it:</span>Light (0) = no experimental validation. Dark (high count) = gene validated across many conditions.' +
+            '<span class="tt-label">Biological insight:</span>High fitness counts indicate experimentally verified importance. Genes with high phenotype predictions but zero fitness scores may need experimental validation.' },
     ];
 
     // === SORT PRESETS ===
