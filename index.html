@@ -769,6 +769,7 @@
     //   2. Update config.json with new field mappings, tracks, organism info
     //   3. Reload the viewer
     let CONFIG = null;
+    let METADATA = null;  // Loaded from metadata.json (genome-specific info)
 
     // === DATA FIELD INDICES (defaults, overridden by config.json) ===
     let F = {
@@ -1087,7 +1088,17 @@
         try {
             const resp = await fetch('config.json');
             CONFIG = await resp.json();
-            console.log(`Loaded config for: ${CONFIG.organism || 'unknown organism'}`);
+
+            // Load metadata (genome-specific info from database)
+            if (CONFIG.data_files && CONFIG.data_files.metadata) {
+                try {
+                    const metaResp = await fetch(CONFIG.data_files.metadata);
+                    METADATA = await metaResp.json();
+                    console.log(`Loaded genome: ${METADATA.organism} (${METADATA.n_genes} genes, ${METADATA.n_ref_genomes} refs)`);
+                } catch (e) {
+                    console.warn('metadata.json not found, using config defaults');
+                }
+            }
 
             // Apply config overrides
             if (CONFIG.fields) F = CONFIG.fields;
@@ -1169,8 +1180,8 @@
         const lowCons = genes.filter(g => g[F.AVG_CONS] >= 0 && g[F.AVG_CONS] < 0.5).length;
 
         document.getElementById('kpi-bar').innerHTML = `
-            <span class="kpi-stat" style="font-weight:700; font-style:italic;">${CONFIG.organism || ''}</span>
-            <span class="kpi-stat"><span class="kpi-label">${CONFIG.genome_id || ''}</span></span>
+            <span class="kpi-stat" style="font-weight:700; font-style:italic;">${METADATA?.organism || 'Unknown Organism'}</span>
+            <span class="kpi-stat"><span class="kpi-label">${METADATA?.genome_id || ''}</span></span>
             <span class="kpi-stat"><span class="kpi-value">${total}</span><span class="kpi-label">genes</span></span>
             <span class="kpi-stat"><span class="kpi-value">${core}</span><span class="kpi-label">core</span></span>
             <span class="kpi-stat"><span class="kpi-value">${accessory}</span><span class="kpi-label">accessory</span></span>

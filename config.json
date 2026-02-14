@@ -1,10 +1,7 @@
 {
   "title": "Genome Heatmap Viewer",
-  "organism": "Acinetobacter baylyi ADP1",
-  "genome_id": "user_Acinetobacter_baylyi_ADP1_RAST",
-  "genome_assembly": "NC_005966.1",
-  "n_ref_genomes": 13,
   "data_files": {
+    "metadata": "metadata.json",
     "genes": "genes_data.json",
     "tree": "tree_data.json",
     "cluster": "cluster_data.json",
