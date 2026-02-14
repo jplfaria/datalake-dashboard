@@ -742,6 +742,15 @@
                 </div>
             </div>
             <div class="sidebar-section">
+                <div class="sidebar-section-title" onclick="toggleSidebarSection(this)">
+                    <span>Unmapped Reactions</span>
+                    <span class="toggle-icon">&#9660;</span>
+                </div>
+                <div style="padding: 8px 12px; font-size: 10px; color: var(--kb-base); line-height: 1.4; max-height: 200px; overflow-y: auto;" id="metabolic-unmapped">
+                    Loading...
+                </div>
+            </div>
+            <div class="sidebar-section">
                 <div class="sidebar-section-title">
                     <span>Reaction Detail</span>
                     <span class="toggle-icon">&#9660;</span>
@@ -2764,6 +2773,7 @@
         // Count how many reactions on current map
         const mapData = cachedMaps[currentMapId];
         let onMap = 0, withData = 0;
+        const onMapSet = new Set();
         if (mapData && mapData[1] && mapData[1].reactions) {
             const mapRxns = mapData[1].reactions;
             const totalOnMap = Object.keys(mapRxns).length;
@@ -2771,7 +2781,11 @@
                 const biggId = mapRxns[k].bigg_id;
                 // Strip compartment suffix (_c0, _e0, etc.) to match our base IDs
                 const baseId = biggId.replace(/_[cepxm]\d+$/, '');
-                if (reactionsData.reactions[baseId]) { withData++; onMap++; }
+                if (reactionsData.reactions[baseId]) {
+                    withData++;
+                    onMap++;
+                    onMapSet.add(baseId);
+                }
                 else onMap++;
             }
             const notOnMap = stats.total_reactions - withData;
@@ -2790,7 +2804,89 @@
                     Data from ${reactionsData.n_genomes} genomes
                 </div>
             `;
+            renderUnmappedReactions(onMapSet);
         }
+    }
+
+    function renderUnmappedReactions(onMapSet) {
+        if (!reactionsData) return;
+
+        // Find all reactions NOT on the current map
+        const unmapped = [];
+        for (const [rxnId, rxn] of Object.entries(reactionsData.reactions)) {
+            if (!onMapSet.has(rxnId)) {
+                unmapped.push({ id: rxnId, ...rxn });
+            }
+        }
+
+        // Sort by ID for easy browsing
+        unmapped.sort((a, b) => a.id.localeCompare(b.id));
+
+        const el = document.getElementById('metabolic-unmapped');
+        if (unmapped.length === 0) {
+            el.innerHTML = '<span style="color:#9D9389;">All reactions are on this map</span>';
+            return;
+        }
+
+        // Show first 50, with option to see all
+        const maxShow = 50;
+        const showAll = unmapped.length <= maxShow;
+        const toShow = showAll ? unmapped : unmapped.slice(0, maxShow);
+
+        let html = `<div style="margin-bottom:6px; font-weight:600;">${unmapped.length} reactions not visualized:</div>`;
+        html += '<div style="font-family: monospace; line-height: 1.6;">';
+
+        for (const rxn of toShow) {
+            const isExchange = rxn.id.startsWith('EX_');
+            const hasGenes = rxn.genes && rxn.genes.trim() !== '';
+            const label = isExchange ? '(exchange)' : hasGenes ? `(${rxn.genes.split(/\s+or\s+|\s+and\s+/).length} genes)` : '(no genes)';
+            html += `<div style="margin-bottom:2px;"><span style="color:var(--kb-accent)">${rxn.id}</span> <span style="color:#9D9389; font-size:9px;">${label}</span></div>`;
+        }
+
+        if (!showAll) {
+            html += `<div style="margin-top:8px; padding-top:6px; border-top:1px solid #DED5CB; color:var(--kb-accent); cursor:pointer;" onclick="showAllUnmappedReactions()">+ Show all ${unmapped.length} unmapped reactions</div>`;
+        }
+
+        html += '</div>';
+        el.innerHTML = html;
+    }
+
+    function showAllUnmappedReactions() {
+        // Rebuild with all reactions
+        const mapData = cachedMaps[currentMapId];
+        const onMapSet = new Set();
+        if (mapData && mapData[1] && mapData[1].reactions) {
+            const mapRxns = mapData[1].reactions;
+            for (const k of Object.keys(mapRxns)) {
+                const biggId = mapRxns[k].bigg_id;
+                const baseId = biggId.replace(/_[cepxm]\d+$/, '');
+                if (reactionsData.reactions[baseId]) {
+                    onMapSet.add(baseId);
+                }
+            }
+        }
+
+        const unmapped = [];
+        for (const [rxnId, rxn] of Object.entries(reactionsData.reactions)) {
+            if (!onMapSet.has(rxnId)) {
+                unmapped.push({ id: rxnId, ...rxn });
+            }
+        }
+        unmapped.sort((a, b) => a.id.localeCompare(b.id));
+
+        const el = document.getElementById('metabolic-unmapped');
+        let html = `<div style="margin-bottom:6px; font-weight:600;">${unmapped.length} reactions not visualized:</div>`;
+        html += '<div style="font-family: monospace; line-height: 1.6;">';
+
+        for (const rxn of unmapped) {
+            const isExchange = rxn.id.startsWith('EX_');
+            const hasGenes = rxn.genes && rxn.genes.trim() !== '';
+            const label = isExchange ? '(exchange)' : hasGenes ? `(${rxn.genes.split(/\s+or\s+|\s+and\s+/).length} genes)` : '(no genes)';
+            html += `<div style="margin-bottom:2px;"><span style="color:var(--kb-accent)">${rxn.id}</span> <span style="color:#9D9389; font-size:9px;">${label}</span></div>`;
+        }
+
+        html += '</div>';
+        el.innerHTML = html;
     }
 
     function updateMetabolicToolbar() {
