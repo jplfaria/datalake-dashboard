@@ -2665,14 +2665,27 @@
     function buildReactionColorData(colorBy) {
         if (!reactionsData) return {};
         const data = {};
+
+        // For each of our reactions, map to ALL possible Escher ID formats
         for (const [rxnId, rxn] of Object.entries(reactionsData.reactions)) {
+            let value;
             switch (colorBy) {
-                case 'conservation': data[rxnId] = rxn.conservation; break;
-                case 'presence': data[rxnId] = 1; break;
-                case 'flux_rich': data[rxnId] = rxn.flux_rich; break;
-                case 'flux_min': data[rxnId] = rxn.flux_min; break;
-                case 'class_rich': data[rxnId] = FLUX_CLASSES.indexOf(rxn.class_rich); break;
-                case 'class_min': data[rxnId] = FLUX_CLASSES.indexOf(rxn.class_min); break;
+                case 'conservation': value = rxn.conservation; break;
+                case 'presence': value = 1; break;
+                case 'flux_rich': value = rxn.flux_rich; break;
+                case 'flux_min': value = rxn.flux_min; break;
+                case 'class_rich': value = FLUX_CLASSES.indexOf(rxn.class_rich); break;
+                case 'class_min': value = FLUX_CLASSES.indexOf(rxn.class_min); break;
+            }
+
+            // Escher accepts multiple ID formats - add all variations
+            // 1. Base ID (rxn00225)
+            data[rxnId] = value;
+
+            // 2. With common compartments (rxn00225_c0, rxn00225_e0, etc.)
+            const compartments = ['c0', 'e0', 'p0', 'm0', 'x0'];
+            for (const comp of compartments) {
+                data[`${rxnId}_${comp}`] = value;
             }
         }
         return data;
@@ -2756,7 +2769,9 @@
             const totalOnMap = Object.keys(mapRxns).length;
             for (const k of Object.keys(mapRxns)) {
                 const biggId = mapRxns[k].bigg_id;
-                if (reactionsData.reactions[biggId]) { withData++; onMap++; }
+                // Strip compartment suffix (_c0, _e0, etc.) to match our base IDs
+                const baseId = biggId.replace(/_[cepxm]\d+$/, '');
+                if (reactionsData.reactions[baseId]) { withData++; onMap++; }
                 else onMap++;
             }
             const notOnMap = stats.total_reactions - withData;
