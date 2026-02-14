@@ -2,6 +2,7 @@
   "title": "Genome Heatmap Viewer",
   "data_files": {
     "metadata": "metadata.json",
+    "summary": "summary_stats.json",
     "genes": "genes_data.json",
     "tree": "tree_data.json",
     "cluster": "cluster_data.json",
