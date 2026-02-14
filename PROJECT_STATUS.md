@@ -1,20 +1,22 @@
 # Genome Feature Profiler — Project Status
 
 **Live site:** https://jplfaria.github.io/genome-heatmap-viewer/
-**Organism:** *Escherichia coli* K-12 MG1655 (GCF_000005845.2)
-**Genome ID:** 562.61143
-**Last updated:** 2026-02-13
+**Organism:** *Acinetobacter baylyi* ADP1 (NC_005966.1)
+**Genome ID:** user_Acinetobacter_baylyi_ADP1_RAST
+**Last updated:** 2026-02-14
+**Phase:** Phase 0 Complete ✅ → Moving to Phase 1
 
 ---
 
 ## Overview
 
-A multi-view genome visualization tool that profiles gene features across conservation, function consistency, annotation depth, and pangenome structure. Built for KBase/BERDL integration.
+A **database-agnostic** genome visualization tool that profiles gene features across conservation, function consistency, annotation depth, and pangenome structure. Built as a **standalone app** for KBase/BERDL integration.
 
-- **4,617 genes** with 29 data fields each
-- **36 genomes** in pangenome (35 references + user genome)
-- Pure vanilla HTML/CSS/JS (2,884 lines), Canvas API + SVG, no frameworks, no build step
-- Config-driven via `config.json`
+- **3,235 genes** with 36 data fields each
+- **14 genomes** in pangenome (13 references + user genome)
+- Pure vanilla HTML/CSS/JS (3,000+ lines), Canvas API + SVG, no frameworks, no build step
+- **Dynamically adapts to any BERDL database** - no hardcoding
+- Config-driven via `config.json` + `metadata.json`
 - KBase-branded UI (PR #1 by David Lyon)
 
 ---
@@ -23,10 +25,55 @@ A multi-view genome visualization tool that profiles gene features across conser
 
 | Tab | Rendering | What it shows |
 |-----|-----------|---------------|
-| **Tracks** | Canvas | Multi-track heatmap of all 4,617 genes across 24 data tracks. Minimap navigation, zoom 1-100x, gene search, hover tooltips |
-| **Tree** | SVG | UPGMA dendrogram of 36 genomes (Jaccard distance on pangenome clusters). Collapsible stat bars per genome |
+| **Tracks** | Canvas | Multi-track heatmap of all 3,235 genes across 29 active tracks. Minimap navigation, zoom 1-100x, gene search, hover tooltips |
+| **Tree** | SVG | UPGMA dendrogram of 14 genomes (Jaccard distance on pangenome clusters). Collapsible stat bars per genome |
 | **Clusters** | Canvas | UMAP 2D scatter of genes in two embedding spaces (gene features / presence-absence), colored by any track |
-| **Metabolic Map** | Escher/SVG | Interactive pathway maps (Global 746 rxns, Core 201 rxns). Color by conservation, flux, flux class, or presence. Reaction click shows detail panel |
+| **Metabolic Map** | Escher/SVG | Interactive pathway maps (Global 759 rxns, Core 201 rxns). Color by conservation, flux (6 classes), or presence. Reaction click shows detail panel with gene links |
+
+---
+
+## Phase 0: Database Migration (COMPLETED ✅)
+
+**Goal**: Make the viewer **database-agnostic** - work with any BERDL database without hardcoding.
+
+### What Changed
+
+1. **Updated all generation scripts** for split-table schema
+   - `genome_features` (user genome) + `pan_genome_features` (references)
+   - Dynamic user genome detection: `WHERE id LIKE 'user_%'`
+   - Consistency scores computed from cluster annotations (not pre-computed)
+   - Multi-cluster genes: split semicolon-separated IDs, take max score
+
+2. **Added 7 new gene fields** (indices 29-35)
+   - `REACTIONS`: Semicolon-separated reaction IDs
+   - `RICH_FLUX`: Metabolic flux in rich media
+   - `RICH_CLASS`: Flux class (blocked, forward, reverse, reversible, essential_forward, essential_reverse)
+   - `MIN_FLUX`: Metabolic flux in minimal media
+   - `MIN_CLASS`: Flux class in minimal media
+   - `PSORTB_NEW`: Updated subcellular localization
+   - `ESSENTIALITY`: Gene essentiality score (0-1)
+
+3. **Made organism metadata dynamic**
+   - Created `generate_metadata.py` to extract from DB
+   - Removed hardcoded organism, genome_id, n_ref_genomes from config
+   - Viewer loads `metadata.json` and adapts automatically
+
+4. **Activated new tracks**
+   - Flux (rich media), Flux (minimal media)
+   - Flux Class (rich), Flux Class (minimal)
+   - Gene Essentiality
+   - Reduced placeholder tracks from 6 to 1 (only Neighborhood Conservation pending)
+
+5. **Migrated test dataset**
+   - E. coli K-12 MG1655 (4,617 genes, 36 genomes) → **Acinetobacter baylyi ADP1** (3,235 genes, 14 genomes)
+   - All JSON data files regenerated and verified
+
+### Key Commits
+- `eb19ca9` - Add detailed project status document
+- `39ec52e` - Add gene extraction script, fix IS_HYPO legend, redesign specificity
+- `d7af90f` - Complete Phase 0: all scripts updated, data regenerated
+- `e12d9c7` - Fix organism metadata in config to match ADP1 data
+- `abf8233` - Make organism metadata database-agnostic
 
 ---
 
@@ -34,20 +81,23 @@ A multi-view genome visualization tool that profiles gene features across conser
 
 ### Source Data
 
-- **Primary:** BERDL SQLite database (`berdl_tables_ontology_terms.db`, 148 MB)
+- **Primary:** BERDL SQLite database (`berdl_tables.db`, ~132 MB)
   - Produced by [KBDatalakeApps](https://github.com/kbaseapps/KBDatalakeApps) pipeline
-  - Tables: `genome_features`, `pan_genome_features`, `genome`, `genome_ani`, `phenotype_module`, `ontology_terms`
-- **Temporary:** `genome_reactions.tsv` — will be added to the SQLite DB in a future pipeline update
+  - **Split-table schema**: `genome_features` (user genome) + `pan_genome_features` (references)
+  - Tables: `genome`, `genome_features`, `pan_genome_features`, `pangenome_cluster`, `genome_reactions`, `gene_phenotypes`, `genome_ani`, `ontology_terms`
 - **Static:** ModelSEED Escher pathway maps (organism-agnostic)
 
-### Generation Scripts
+### Generation Scripts (Phase 0 ✅)
 
-| Script | Input | Output | Size | Status |
-|--------|-------|--------|------|--------|
-| `generate_genes_data.py` | SQLite DB | `genes_data.json` (4,617 genes x 29 fields) | 656 KB | Stable |
-| `generate_tree_data.py` | SQLite DB | `tree_data.json` (36 genomes, UPGMA linkage) | 14 KB | Stable |
-| `generate_cluster_data.py` | SQLite DB + genes_data.json | `cluster_data.json` (4,617 2D points x 2 modes) | 337 KB | Stable |
-| `generate_reactions_data.py` | genome_reactions.tsv | `reactions_data.json` (1,279 reactions) | 383 KB | **TSV source is temporary** |
+All scripts now **database-agnostic** - auto-detect user genome and adapt to any BERDL DB.
+
+| Script | Input | Output | Current Size | Status |
+|--------|-------|--------|--------------|--------|
+| `generate_metadata.py` | SQLite DB | `metadata.json` (organism info) | <1 KB | ✅ NEW - Phase 0 |
+| `generate_genes_data.py` | SQLite DB | `genes_data.json` (3,235 × 36 fields) | 570 KB | ✅ Updated - Phase 0 |
+| `generate_tree_data.py` | SQLite DB | `tree_data.json` (14 genomes, UPGMA) | 5 KB | ✅ Updated - Phase 0 |
+| `generate_cluster_data.py` | SQLite DB + genes | `cluster_data.json` (3,235 2D points × 2 modes) | 5 MB | ✅ Updated - Phase 0 |
+| `generate_reactions_data.py` | SQLite DB | `reactions_data.json` (1,279 reactions) | 499 KB | ✅ Updated - Phase 0 |
 
 ### Static Map Files
 
@@ -74,7 +124,7 @@ python3 generate_reactions_data.py
 
 ---
 
-## Gene Data Fields (29 per gene)
+## Gene Data Fields (36 per gene)
 
 | Index | Field | Type | Description |
 |-------|-------|------|-------------|
@@ -107,6 +157,13 @@ python3 generate_reactions_data.py
 | 26 | N_MODULES | int | Number of KEGG modules hit by this gene's KO terms |
 | 27 | EC_MAP_CONS | float | EC-mapped consistency (average of ec_mapped_consistency JSON values) |
 | 28 | PROT_LEN | int | Protein length (amino acids) |
+| **29** | **REACTIONS** | **string** | **Semicolon-separated reaction IDs** |
+| **30** | **RICH_FLUX** | **float** | **Metabolic flux in rich media (FBA result)** |
+| **31** | **RICH_CLASS** | **int** | **Flux class in rich media (0=blocked, 1=forward, 2=reverse, 3=reversible, 4=essential_fwd, 5=essential_rev)** |
+| **32** | **MIN_FLUX** | **float** | **Metabolic flux in minimal media** |
+| **33** | **MIN_CLASS** | **int** | **Flux class in minimal media** |
+| **34** | **PSORTB_NEW** | **string** | **Updated PSORTb localization prediction** |
+| **35** | **ESSENTIALITY** | **float** | **Gene essentiality score (0-1, from gene_phenotypes)** |
 
 ### Consistency Scores
 
