@@ -30,3 +30,5 @@ playwright-report/
 # Uncomment if you don't want to track data files:
 # *.db
 # *.sqlite
+berdl_tables.db
+berdl_tables_ontology_terms.db

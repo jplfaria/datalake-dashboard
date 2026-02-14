@@ -22,7 +22,9 @@
     "EC_CONS": 16, "AVG_CONS": 17, "BAKTA_CONS": 18, "EC_AVG_CONS": 19,
     "SPECIFICITY": 20, "IS_HYPO": 21, "HAS_NAME": 22, "N_EC": 23,
     "AGREEMENT": 24, "CLUSTER_SIZE": 25, "N_MODULES": 26,
-    "EC_MAP_CONS": 27, "PROT_LEN": 28
+    "EC_MAP_CONS": 27, "PROT_LEN": 28,
+    "REACTIONS": 29, "RICH_FLUX": 30, "RICH_CLASS": 31, "MIN_FLUX": 32,
+    "MIN_CLASS": 33, "PSORTB_NEW": 34, "ESSENTIALITY": 35
   },
   "categories": {
     "localization": ["Cytoplasmic", "CytoMembrane", "Periplasmic", "OuterMembrane", "Extracellular", "Unknown"],
@@ -53,15 +55,15 @@
     { "id": "cluster_size", "name": "Cluster Size", "field": "CLUSTER_SIZE", "type": "sequential", "enabled": false },
     { "id": "n_modules", "name": "KEGG Module Hits", "field": "N_MODULES", "type": "sequential", "enabled": false },
     { "id": "ec_map_cons", "name": "EC Mapped Consistency", "field": "EC_MAP_CONS", "type": "consistency", "enabled": false },
-    { "id": "prot_len", "name": "Protein Length", "field": "PROT_LEN", "type": "sequential", "enabled": false }
+    { "id": "prot_len", "name": "Protein Length", "field": "PROT_LEN", "type": "sequential", "enabled": false },
+    { "id": "rich_flux", "name": "Flux (rich media)", "field": "RICH_FLUX", "type": "sequential", "enabled": false },
+    { "id": "min_flux", "name": "Flux (minimal media)", "field": "MIN_FLUX", "type": "sequential", "enabled": false },
+    { "id": "rich_class", "name": "Flux Class (rich)", "field": "RICH_CLASS", "type": "categorical", "enabled": false, "categories": ["essential", "variable", "blocked"] },
+    { "id": "min_class", "name": "Flux Class (minimal)", "field": "MIN_CLASS", "type": "categorical", "enabled": false, "categories": ["essential", "variable", "blocked"] },
+    { "id": "essentiality", "name": "Gene Essentiality", "field": "ESSENTIALITY", "type": "sequential", "enabled": false }
   ],
   "placeholder_tracks": [
-    { "id": "neighborhood", "name": "Neighborhood Conservation*", "pending": true },
-    { "id": "flux_minimal", "name": "Flux (minimal media)*", "pending": true },
-    { "id": "rxn_class_min", "name": "Rxn Class (minimal)*", "pending": true },
-    { "id": "rxn_class_rich", "name": "Rxn Class (rich)*", "pending": true },
-    { "id": "n_phenotypes", "name": "# Phenotypes*", "pending": true },
-    { "id": "n_fitness", "name": "# Fitness Scores*", "pending": true }
+    { "id": "neighborhood", "name": "Neighborhood Conservation*", "pending": true }
   ],
   "sort_presets": [
     { "id": "genome", "name": "Genome Order" },
