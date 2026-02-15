@@ -514,6 +514,18 @@
         .rxn-gene-link { color: var(--kb-primary); cursor: pointer; text-decoration: underline; }
         .rxn-gene-link:hover { color: var(--kb-primary-dark); }
         .metabolic-loading { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--kb-base-light); font-size: 14px; }
+        /* Reaction Table */
+        .reaction-table-container { flex: 1; overflow: auto; background: var(--kb-white); display: none; }
+        .reaction-table-toolbar { padding: 8px 12px; background: var(--kb-base-lightest); border-bottom: 1px solid var(--kb-base-lighter); display: flex; gap: 12px; align-items: center; font-size: 11px; }
+        .reaction-table-toolbar select { padding: 4px 8px; border: 1px solid var(--kb-base-lighter); border-radius: 4px; font-size: 11px; }
+        .reaction-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .reaction-table th { background: var(--kb-base-lightest); padding: 8px; text-align: left; border-bottom: 2px solid var(--kb-base-lighter); position: sticky; top: 0; cursor: pointer; user-select: none; }
+        .reaction-table th:hover { background: var(--kb-base-light); }
+        .reaction-table td { padding: 6px 8px; border-bottom: 1px solid var(--kb-base-lightest); }
+        .reaction-table tr:hover { background: var(--kb-base-lightest); }
+        .reaction-table .rxn-id-col { font-weight: 600; color: var(--kb-accent); }
+        .reaction-table .rxn-eq-col { max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+        .reaction-table .rxn-genes-col { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
     </style>
 </head>
 <body>
@@ -853,6 +865,9 @@
                 <div class="action-item" onclick="exportReactions()" style="padding: 8px 12px; cursor: pointer;">
                     <span class="icon">&#8595;</span> Export reactions (CSV)
                 </div>
+                <div class="action-item" onclick="toggleReactionTable()" style="padding: 8px 12px; cursor: pointer;">
+                    <span class="icon" id="table-toggle-icon">&#9776;</span> <span id="table-toggle-text">Show reaction table</span>
+                </div>
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-title">
@@ -870,6 +885,46 @@
             </div>
             <div id="metabolic-container">
                 <div class="metabolic-loading" id="metabolic-loading">Click the Metabolic Map tab to load...</div>
+            </div>
+            <div class="reaction-table-container" id="reaction-table-container">
+                <div class="reaction-table-toolbar">
+                    <span>Filter:</span>
+                    <select id="rxn-table-filter" onchange="filterReactionTable()">
+                        <option value="all">All reactions</option>
+                        <option value="on_map">On map</option>
+                        <option value="not_on_map">Not on map</option>
+                        <option value="has_genes">With genes</option>
+                        <option value="no_genes">No genes</option>
+                        <option value="exchange">Exchange</option>
+                    </select>
+                    <span>Sort:</span>
+                    <select id="rxn-table-sort" onchange="sortReactionTable()">
+                        <option value="id">Reaction ID</option>
+                        <option value="conservation">Conservation</option>
+                        <option value="flux_rich">Flux (rich)</option>
+                        <option value="flux_min">Flux (minimal)</option>
+                    </select>
+                    <span id="rxn-table-count" style="margin-left: auto;"></span>
+                </div>
+                <div style="overflow: auto; flex: 1;">
+                    <table class="reaction-table" id="reaction-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Equation</th>
+                                <th>Genes</th>
+                                <th>Cons</th>
+                                <th>Flux (R)</th>
+                                <th>Class (R)</th>
+                                <th>Flux (M)</th>
+                                <th>Class (M)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reaction-table-body">
+                            <tr><td colspan="8" style="text-align:center; padding:20px;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -3163,6 +3218,125 @@
         a.download = `reactions_${Date.now()}.csv`;
         a.click();
         URL.revokeObjectURL(url);
+    }
+
+    // Reaction Table Functions
+    let reactionTableVisible = false;
+    let filteredReactions = [];
+
+    function toggleReactionTable() {
+        reactionTableVisible = !reactionTableVisible;
+        const mapContainer = document.getElementById('metabolic-container');
+        const tableContainer = document.getElementById('reaction-table-container');
+        const toggleIcon = document.getElementById('table-toggle-icon');
+        const toggleText = document.getElementById('table-toggle-text');
+
+        if (reactionTableVisible) {
+            mapContainer.style.display = 'none';
+            tableContainer.style.display = 'flex';
+            toggleIcon.innerHTML = '&#128506;'; // map icon
+            toggleText.textContent = 'Show map';
+            renderReactionTable();
+        } else {
+            mapContainer.style.display = 'flex';
+            tableContainer.style.display = 'none';
+            toggleIcon.innerHTML = '&#9776;'; // table icon
+            toggleText.textContent = 'Show reaction table';
+        }
+    }
+
+    function renderReactionTable() {
+        if (!reactionsData) return;
+
+        // Get filter and sort preferences
+        const filter = document.getElementById('rxn-table-filter').value;
+        const sort = document.getElementById('rxn-table-sort').value;
+
+        // Determine which reactions are on map
+        const onMapSet = new Set();
+        const mapData = cachedMaps[currentMapId];
+        if (mapData && mapData[1] && mapData[1].reactions) {
+            for (const k of Object.keys(mapData[1].reactions)) {
+                const biggId = mapData[1].reactions[k].bigg_id;
+                const baseId = biggId.replace(/_[cepxm]\d+$/, '');
+                if (reactionsData.reactions[baseId]) {
+                    onMapSet.add(baseId);
+                }
+            }
+        }
+
+        // Filter reactions
+        filteredReactions = [];
+        for (const [rxnId, rxn] of Object.entries(reactionsData.reactions)) {
+            let include = false;
+            const hasGenes = rxn.genes && rxn.genes.trim() !== '';
+            const isExchange = rxnId.startsWith('EX_');
+            const isOnMap = onMapSet.has(rxnId);
+
+            switch (filter) {
+                case 'all': include = true; break;
+                case 'on_map': include = isOnMap; break;
+                case 'not_on_map': include = !isOnMap; break;
+                case 'has_genes': include = hasGenes; break;
+                case 'no_genes': include = !hasGenes; break;
+                case 'exchange': include = isExchange; break;
+            }
+
+            if (include) {
+                filteredReactions.push({ id: rxnId, ...rxn });
+            }
+        }
+
+        // Sort reactions
+        filteredReactions.sort((a, b) => {
+            switch (sort) {
+                case 'id': return a.id.localeCompare(b.id);
+                case 'conservation': return (b.conservation || 0) - (a.conservation || 0);
+                case 'flux_rich': return Math.abs(b.flux_rich || 0) - Math.abs(a.flux_rich || 0);
+                case 'flux_min': return Math.abs(b.flux_min || 0) - Math.abs(a.flux_min || 0);
+                default: return 0;
+            }
+        });
+
+        // Render table
+        const tbody = document.getElementById('reaction-table-body');
+        if (filteredReactions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#9D9389;">No reactions match this filter</td></tr>';
+        } else {
+            let html = '';
+            for (const rxn of filteredReactions) {
+                const eq = rxn.equation || '';
+                const genes = rxn.genes || 'No genes';
+                const cons = ((rxn.conservation || 0) * 100).toFixed(0) + '%';
+                const fluxR = (rxn.flux_rich || 0).toFixed(3);
+                const classR = rxn.class_rich || '-';
+                const fluxM = (rxn.flux_min || 0).toFixed(3);
+                const classM = rxn.class_min || '-';
+
+                html += `<tr>
+                    <td class="rxn-id-col">${rxn.id}</td>
+                    <td class="rxn-eq-col" title="${eq}">${eq}</td>
+                    <td class="rxn-genes-col" title="${genes}">${genes}</td>
+                    <td>${cons}</td>
+                    <td>${fluxR}</td>
+                    <td>${classR}</td>
+                    <td>${fluxM}</td>
+                    <td>${classM}</td>
+                </tr>`;
+            }
+            tbody.innerHTML = html;
+        }
+
+        // Update count
+        document.getElementById('rxn-table-count').textContent = `Showing ${filteredReactions.length} reactions`;
+    }
+
+    function filterReactionTable() {
+        renderReactionTable();
+    }
+
+    function sortReactionTable() {
+        renderReactionTable();
     }
 
     function updateMetabolicToolbar() {
