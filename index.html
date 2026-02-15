@@ -647,6 +647,12 @@
                 <div class="action-item" onclick="deselectAll()">
                     <span class="icon">&#9744;</span> Deselect all tracks
                 </div>
+                <div class="action-item" onclick="exportCurrentView()">
+                    <span class="icon">&#8595;</span> Export current view (CSV)
+                </div>
+                <div class="action-item" onclick="exportAllGenes()">
+                    <span class="icon">&#8595;</span> Export all genes (CSV)
+                </div>
             </div>
         </div>
         <div class="main">
@@ -837,6 +843,15 @@
                 </div>
                 <div style="padding: 8px 12px; font-size: 10px; color: var(--kb-base); line-height: 1.4; max-height: 200px; overflow-y: auto;" id="metabolic-unmapped">
                     Loading...
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <span>Actions</span>
+                    <span class="toggle-icon">&#9660;</span>
+                </div>
+                <div class="action-item" onclick="exportReactions()" style="padding: 8px 12px; cursor: pointer;">
+                    <span class="icon">&#8595;</span> Export reactions (CSV)
                 </div>
             </div>
             <div class="sidebar-section">
@@ -1608,6 +1623,79 @@
     }
     function selectAll() { TRACKS.forEach(t => t.enabled = true); renderTrackList(); render(); renderMinimap(); }
     function deselectAll() { TRACKS.forEach(t => t.enabled = false); renderTrackList(); render(); renderMinimap(); }
+
+    function exportCurrentView() {
+        // Export currently visible/sorted genes to CSV
+        const headers = ['Gene_ID', 'Function', 'Start', 'Length', 'Strand', 'Conservation', 'Category', 'Avg_Consistency'];
+        const rows = [headers.join(',')];
+
+        for (const idx of sortedIndices) {
+            const g = genes[idx];
+            const fid = g[CONFIG.fields.FID];
+            const func = (g[CONFIG.fields.FUNC] || '').replace(/,/g, ';').replace(/"/g, '""');
+            const start = g[CONFIG.fields.START];
+            const length = g[CONFIG.fields.LENGTH];
+            const strand = g[CONFIG.fields.STRAND] === 1 ? '+' : '-';
+            const cons = g[CONFIG.fields.CONS_FRAC];
+            const cat = ['Unknown', 'Accessory', 'Core'][g[CONFIG.fields.PAN_CAT]] || 'Unknown';
+            const avgCons = g[CONFIG.fields.AVG_CONS];
+
+            rows.push(`${fid},"${func}",${start},${length},${strand},${cons},${cat},${avgCons}`);
+        }
+
+        const csv = rows.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `genome_view_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function exportAllGenes() {
+        // Export all genes with all fields to CSV
+        const headers = ['Gene_ID', 'Function', 'Start', 'Length', 'Strand', 'Conservation', 'Category', 'Avg_Consistency', 'RAST_Cons', 'KO_Cons', 'GO_Cons', 'EC_Cons', 'Bakta_Cons', 'Specificity', 'Cluster_Size', 'N_KO', 'N_COG', 'N_Pfam', 'N_GO', 'N_EC', 'Localization', 'Is_Hypothetical', 'N_Phenotypes', 'N_Fitness'];
+        const rows = [headers.join(',')];
+
+        for (const g of genes) {
+            const fid = g[CONFIG.fields.FID];
+            const func = (g[CONFIG.fields.FUNC] || '').replace(/,/g, ';').replace(/"/g, '""');
+            const start = g[CONFIG.fields.START];
+            const length = g[CONFIG.fields.LENGTH];
+            const strand = g[CONFIG.fields.STRAND] === 1 ? '+' : '-';
+            const cons = g[CONFIG.fields.CONS_FRAC];
+            const cat = ['Unknown', 'Accessory', 'Core'][g[CONFIG.fields.PAN_CAT]] || 'Unknown';
+            const avgCons = g[CONFIG.fields.AVG_CONS];
+            const rastCons = g[CONFIG.fields.RAST_CONS];
+            const koCons = g[CONFIG.fields.KO_CONS];
+            const goCons = g[CONFIG.fields.GO_CONS];
+            const ecCons = g[CONFIG.fields.EC_CONS];
+            const baktaCons = g[CONFIG.fields.BAKTA_CONS];
+            const spec = g[CONFIG.fields.SPECIFICITY];
+            const clusterSize = g[CONFIG.fields.CLUSTER_SIZE];
+            const nKo = g[CONFIG.fields.N_KO];
+            const nCog = g[CONFIG.fields.N_COG];
+            const nPfam = g[CONFIG.fields.N_PFAM];
+            const nGo = g[CONFIG.fields.N_GO];
+            const nEc = g[CONFIG.fields.N_EC];
+            const loc = g[CONFIG.fields.LOC];
+            const isHypo = g[CONFIG.fields.IS_HYPO];
+            const nPheno = g[CONFIG.fields.N_PHENOTYPES] || 0;
+            const nFit = g[CONFIG.fields.N_FITNESS] || 0;
+
+            rows.push(`${fid},"${func}",${start},${length},${strand},${cons},${cat},${avgCons},${rastCons},${koCons},${goCons},${ecCons},${baktaCons},${spec},${clusterSize},${nKo},${nCog},${nPfam},${nGo},${nEc},${loc},${isHypo},${nPheno},${nFit}`);
+        }
+
+        const csv = rows.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `all_genes_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
 
     function sortByTrack(idx) {
         const track = TRACKS[idx];
@@ -2979,6 +3067,39 @@
 
         html += '</div>';
         el.innerHTML = html;
+    }
+
+    function exportReactions() {
+        if (!reactionsData) {
+            alert('Reactions data not loaded yet');
+            return;
+        }
+
+        const headers = ['Reaction_ID', 'Equation', 'Genes', 'Conservation', 'Directionality', 'Flux_Rich', 'Class_Rich', 'Flux_Min', 'Class_Min', 'Gapfilling'];
+        const rows = [headers.join(',')];
+
+        for (const [rxnId, rxn] of Object.entries(reactionsData.reactions)) {
+            const eq = (rxn.equation || '').replace(/,/g, ';').replace(/"/g, '""');
+            const genes = (rxn.genes || '').replace(/,/g, ';').replace(/"/g, '""');
+            const cons = rxn.conservation || 0;
+            const dir = rxn.directionality || '';
+            const fluxRich = rxn.flux_rich || 0;
+            const classRich = rxn.class_rich || '';
+            const fluxMin = rxn.flux_min || 0;
+            const classMin = rxn.class_min || '';
+            const gap = rxn.gapfilling || 'none';
+
+            rows.push(`${rxnId},"${eq}","${genes}",${cons},${dir},${fluxRich},${classRich},${fluxMin},${classMin},${gap}`);
+        }
+
+        const csv = rows.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reactions_${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
     }
 
     function updateMetabolicToolbar() {
