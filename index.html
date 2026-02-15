@@ -3807,9 +3807,11 @@
     function renderReactionTable() {
         if (!reactionsData) return;
 
-        // Get filter and sort preferences
+        // Get filter, sort, and search preferences
         const filter = document.getElementById('rxn-table-filter').value;
         const sort = document.getElementById('rxn-table-sort').value;
+        const searchInput = document.getElementById('rxn-table-search');
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
         // Determine which reactions are on map
         const onMapSet = new Set();
@@ -3832,6 +3834,7 @@
             const isExchange = rxnId.startsWith('EX_') || rxnId.startsWith('SK_');
             const isOnMap = onMapSet.has(rxnId);
 
+            // Apply dropdown filter
             switch (filter) {
                 case 'all': include = true; break;
                 case 'metabolic': include = !isExchange; break;
@@ -3840,6 +3843,14 @@
                 case 'has_genes': include = hasGenes; break;
                 case 'no_genes': include = !hasGenes; break;
                 case 'exchange': include = isExchange; break;
+            }
+
+            // Apply search term filter (if present)
+            if (include && searchTerm) {
+                const matchesId = rxnId.toLowerCase().includes(searchTerm);
+                const matchesEq = (rxn.equation || '').toLowerCase().includes(searchTerm);
+                const matchesGenes = (rxn.genes || '').toLowerCase().includes(searchTerm);
+                include = matchesId || matchesEq || matchesGenes;
             }
 
             if (include) {
