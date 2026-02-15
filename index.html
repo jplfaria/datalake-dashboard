@@ -480,6 +480,23 @@
         .cluster-legend { display: flex; gap: 16px; padding: 6px 12px; background: var(--kb-base-lightest); border-top: 1px solid var(--kb-base-lighter); font-size: 10px; color: var(--kb-base); flex-wrap: wrap; flex-shrink: 0; }
         .cluster-legend .legend-item { display: flex; align-items: center; gap: 3px; }
         .cluster-select { padding: 4px 8px; border: 1px solid var(--kb-base-lighter); border-radius: 4px; font-size: 11px; background: var(--kb-white); }
+        /* Summary/Dashboard View */
+        .summary-container { flex: 1; overflow-y: auto; background: var(--kb-base-lightest); padding: 24px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; max-width: 1200px; }
+        .summary-card { background: var(--kb-white); border: 1px solid var(--kb-base-lighter); border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .summary-card-title { font-size: 16px; font-weight: 600; color: var(--kb-base-dark); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .summary-card-title .icon { font-size: 20px; }
+        .summary-metric { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--kb-base-lightest); }
+        .summary-metric:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .summary-metric-label { font-size: 12px; color: var(--kb-base); }
+        .summary-metric-value { font-size: 18px; font-weight: 600; color: var(--kb-primary); }
+        .summary-metric-value.warning { color: #E07B39; }
+        .summary-metric-value.good { color: #1FA860; }
+        .summary-list { max-height: 300px; overflow-y: auto; }
+        .summary-list-item { font-size: 11px; padding: 8px 0; border-bottom: 1px solid var(--kb-base-lightest); font-family: monospace; }
+        .summary-list-item:last-child { border-bottom: none; }
+        .summary-list-item .rxn-id { color: var(--kb-accent); font-weight: 600; }
+        .summary-list-item .rxn-func { color: var(--kb-base); margin-left: 8px; }
         /* Metabolic Map View */
         #metabolic-container { flex: 1; position: relative; overflow: hidden; background: var(--kb-white); }
         #metabolic-container svg { width: 100%; height: 100%; }
@@ -505,10 +522,85 @@
     <!-- Tab Bar -->
     <div class="tab-bar">
         <img src="kbase_logo.png" alt="KBase" style="height: 28px; margin-right: 12px; align-self: center;">
+        <button class="tab-btn" data-tab="summary" onclick="switchTab('summary')">Summary</button>
         <button class="tab-btn active" data-tab="tracks" onclick="switchTab('tracks')">Tracks</button>
         <button class="tab-btn" data-tab="tree" onclick="switchTab('tree')">Tree</button>
         <button class="tab-btn" data-tab="cluster" onclick="switchTab('cluster')">Cluster</button>
         <button class="tab-btn" data-tab="metabolic" onclick="switchTab('metabolic')">Metabolic Map</button>
+    </div>
+    <!-- Tab: Summary -->
+    <div class="tab-content" id="tab-summary">
+        <div class="summary-container">
+            <div class="summary-grid">
+                <!-- Missing Functions Card -->
+                <div class="summary-card">
+                    <div class="summary-card-title">
+                        <span class="icon">⚠️</span>
+                        <span>Missing Functions</span>
+                    </div>
+                    <div class="summary-metric">
+                        <span class="summary-metric-label">Core functions absent</span>
+                        <span class="summary-metric-value warning" id="summary-missing-core">—</span>
+                    </div>
+                    <div class="summary-metric">
+                        <span class="summary-metric-label">Gapfilled reactions</span>
+                        <span class="summary-metric-value" id="summary-gapfilled">—</span>
+                    </div>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--kb-base-lightest);">
+                        <div style="font-size: 11px; font-weight: 600; color: var(--kb-base); margin-bottom: 8px;">Top Missing Reactions</div>
+                        <div class="summary-list" id="summary-missing-list">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Growth Phenotypes Card -->
+                <div class="summary-card">
+                    <div class="summary-card-title">
+                        <span class="icon">🧪</span>
+                        <span>Growth Phenotypes</span>
+                    </div>
+                    <div class="summary-metric">
+                        <span class="summary-metric-label">Total phenotypes tested</span>
+                        <span class="summary-metric-value" id="summary-total-phenotypes">—</span>
+                    </div>
+                    <div class="summary-metric">
+                        <span class="summary-metric-label">Positive growth</span>
+                        <span class="summary-metric-value good" id="summary-positive-growth">—</span>
+                    </div>
+                    <div class="summary-metric">
+                        <span class="summary-metric-label">Negative growth</span>
+                        <span class="summary-metric-value" id="summary-negative-growth">—</span>
+                    </div>
+                    <div class="summary-metric">
+                        <span class="summary-metric-label">Avg gaps (negative)</span>
+                        <span class="summary-metric-value" id="summary-avg-gaps">—</span>
+                    </div>
+                </div>
+
+                <!-- Genome Comparison Card -->
+                <div class="summary-card">
+                    <div class="summary-card-title">
+                        <span class="icon">🧬</span>
+                        <span>Genome Comparison</span>
+                    </div>
+                    <div class="summary-metric">
+                        <span class="summary-metric-label">Reference genomes</span>
+                        <span class="summary-metric-value" id="summary-n-refs">—</span>
+                    </div>
+                    <div class="summary-metric">
+                        <span class="summary-metric-label">Closest ANI</span>
+                        <span class="summary-metric-value good" id="summary-closest-ani">—</span>
+                    </div>
+                    <div class="summary-metric">
+                        <span class="summary-metric-label">User genome genes</span>
+                        <span class="summary-metric-value" id="summary-user-genes">—</span>
+                    </div>
+                    <div class="summary-metric">
+                        <span class="summary-metric-label">Core genes</span>
+                        <span class="summary-metric-value good" id="summary-core-genes">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <!-- Tab: Tracks -->
     <div class="tab-content active" id="tab-tracks">
@@ -1063,6 +1155,8 @@
     let currentMapId = 'full';
     let metabolicColorBy = 'conservation';
     let cachedMaps = {};
+    let summaryData = null;
+    let summaryLoaded = false;
 
     // Flux class constants
     const FLUX_CLASSES = ['blocked', 'forward_only', 'reverse_only', 'reversible', 'essential_forward', 'essential_reverse'];
@@ -1088,6 +1182,7 @@
                 title._collapseWired = true;
             }
         });
+        if (tabId === 'summary' && !summaryLoaded) loadSummaryData();
         if (tabId === 'tree' && !treeLoaded) loadTreeData();
         if (tabId === 'cluster' && !clusterLoaded) loadClusterData();
         if (tabId === 'metabolic' && !metabolicLoaded) loadMetabolicData();
@@ -2991,6 +3086,64 @@
                 <div style="font-size:11px; line-height:1.6; word-break:break-word;">${geneLinks}</div>
             </div>
         `;
+    }
+
+    // Summary Tab Functions
+    async function loadSummaryData() {
+        if (summaryLoaded) return;
+        try {
+            const summaryFile = (CONFIG && CONFIG.data_files && CONFIG.data_files.summary) || 'summary_stats.json';
+            const resp = await fetch(summaryFile);
+            summaryData = await resp.json();
+            summaryLoaded = true;
+            renderSummaryTab();
+        } catch (e) {
+            console.error('Failed to load summary data:', e);
+        }
+    }
+
+    function renderSummaryTab() {
+        if (!summaryData || !genes) return;
+
+        // Missing Functions Card
+        document.getElementById('summary-missing-core').textContent = summaryData.missing_functions.pangenome_missing || '0';
+        document.getElementById('summary-gapfilled').textContent = summaryData.missing_functions.gapfilled || '0';
+
+        // Render top missing reactions (first 10)
+        const topMissing = summaryData.missing_functions.top_missing || [];
+        const missingListEl = document.getElementById('summary-missing-list');
+        if (topMissing.length === 0) {
+            missingListEl.innerHTML = '<div style="color:#9D9389; font-size:11px;">No missing reactions data</div>';
+        } else {
+            let html = '';
+            for (const item of topMissing.slice(0, 10)) {
+                html += `<div class="summary-list-item">
+                    <span class="rxn-id">${item.reaction}</span>
+                    <div class="rxn-func">${item.function}</div>
+                </div>`;
+            }
+            if (topMissing.length > 10) {
+                html += `<div style="text-align:center; padding:8px; color:var(--kb-base); font-size:10px;">+ ${topMissing.length - 10} more...</div>`;
+            }
+            missingListEl.innerHTML = html;
+        }
+
+        // Growth Phenotypes Card
+        const growthData = summaryData.growth_phenotypes || {};
+        document.getElementById('summary-total-phenotypes').textContent = growthData.total_phenotypes || '0';
+        document.getElementById('summary-positive-growth').textContent = growthData.positive_growth || '0';
+        document.getElementById('summary-negative-growth').textContent = growthData.negative_growth || '0';
+        document.getElementById('summary-avg-gaps').textContent = (growthData.avg_negative_gaps || 0).toFixed(2);
+
+        // Genome Comparison Card
+        const compData = summaryData.comparison || {};
+        document.getElementById('summary-n-refs').textContent = compData.n_reference_genomes || '0';
+        document.getElementById('summary-closest-ani').textContent = (compData.closest_ani || 0).toFixed(2) + '%';
+
+        // Add gene counts from loaded data
+        document.getElementById('summary-user-genes').textContent = genes.length.toLocaleString();
+        const coreGenes = genes.filter(g => g[CONFIG.fields.PAN_CAT] === 2).length;
+        document.getElementById('summary-core-genes').textContent = coreGenes.toLocaleString();
     }
 
     // Start
