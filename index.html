@@ -535,16 +535,15 @@
                 <!-- Missing Functions Card -->
                 <div class="summary-card">
                     <div class="summary-card-title">
-                        <span class="icon">⚠️</span>
                         <span>Missing Functions</span>
                     </div>
                     <div class="summary-metric">
                         <span class="summary-metric-label">Core functions absent</span>
-                        <span class="summary-metric-value warning" id="summary-missing-core">—</span>
+                        <span class="summary-metric-value warning" id="summary-missing-core">-</span>
                     </div>
                     <div class="summary-metric">
                         <span class="summary-metric-label">Gapfilled reactions</span>
-                        <span class="summary-metric-value" id="summary-gapfilled">—</span>
+                        <span class="summary-metric-value" id="summary-gapfilled">-</span>
                     </div>
                     <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--kb-base-lightest);">
                         <div style="font-size: 11px; font-weight: 600; color: var(--kb-base); margin-bottom: 8px;">Top Missing Reactions</div>
@@ -555,48 +554,46 @@
                 <!-- Growth Phenotypes Card -->
                 <div class="summary-card">
                     <div class="summary-card-title">
-                        <span class="icon">🧪</span>
                         <span>Growth Phenotypes</span>
                     </div>
                     <div class="summary-metric">
                         <span class="summary-metric-label">Total phenotypes tested</span>
-                        <span class="summary-metric-value" id="summary-total-phenotypes">—</span>
+                        <span class="summary-metric-value" id="summary-total-phenotypes">-</span>
                     </div>
                     <div class="summary-metric">
                         <span class="summary-metric-label">Positive growth</span>
-                        <span class="summary-metric-value good" id="summary-positive-growth">—</span>
+                        <span class="summary-metric-value good" id="summary-positive-growth">-</span>
                     </div>
                     <div class="summary-metric">
                         <span class="summary-metric-label">Negative growth</span>
-                        <span class="summary-metric-value" id="summary-negative-growth">—</span>
+                        <span class="summary-metric-value" id="summary-negative-growth">-</span>
                     </div>
                     <div class="summary-metric">
                         <span class="summary-metric-label">Avg gaps (negative)</span>
-                        <span class="summary-metric-value" id="summary-avg-gaps">—</span>
+                        <span class="summary-metric-value" id="summary-avg-gaps">-</span>
                     </div>
                 </div>
 
                 <!-- Genome Comparison Card -->
                 <div class="summary-card">
                     <div class="summary-card-title">
-                        <span class="icon">🧬</span>
                         <span>Genome Comparison</span>
                     </div>
                     <div class="summary-metric">
                         <span class="summary-metric-label">Reference genomes</span>
-                        <span class="summary-metric-value" id="summary-n-refs">—</span>
+                        <span class="summary-metric-value" id="summary-n-refs">-</span>
                     </div>
                     <div class="summary-metric">
                         <span class="summary-metric-label">Closest ANI</span>
-                        <span class="summary-metric-value good" id="summary-closest-ani">—</span>
+                        <span class="summary-metric-value good" id="summary-closest-ani">-</span>
                     </div>
                     <div class="summary-metric">
                         <span class="summary-metric-label">User genome genes</span>
-                        <span class="summary-metric-value" id="summary-user-genes">—</span>
+                        <span class="summary-metric-value" id="summary-user-genes">-</span>
                     </div>
                     <div class="summary-metric">
                         <span class="summary-metric-label">Core genes</span>
-                        <span class="summary-metric-value good" id="summary-core-genes">—</span>
+                        <span class="summary-metric-value good" id="summary-core-genes">-</span>
                     </div>
                 </div>
             </div>
@@ -2987,7 +2984,7 @@
     function updateMetabolicToolbar() {
         const mapName = (CONFIG && CONFIG.data_files && CONFIG.data_files.metabolic_maps &&
             CONFIG.data_files.metabolic_maps[currentMapId] && CONFIG.data_files.metabolic_maps[currentMapId].name) || currentMapId;
-        document.getElementById('metabolic-toolbar-info').textContent = `${mapName} — ${Object.keys(reactionsData.reactions).length} reactions`;
+        document.getElementById('metabolic-toolbar-info').textContent = `${mapName} - ${Object.keys(reactionsData.reactions).length} reactions`;
     }
 
     async function changeMetabolicMap() {
