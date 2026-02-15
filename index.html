@@ -1722,7 +1722,8 @@
           desc: '<strong>Characterization Targets</strong>' +
             '<span class="tt-label">Purpose:</span>Identify genes that are conserved across genomes but lack functional annotation. These are high-priority targets for experimental characterization.' +
             '<span class="tt-label">What to look for:</span>Genes that show orange (hypothetical) in the first track but green (core) in the second. These are conserved in nearly all reference genomes yet both RAST and Bakta fail to assign a function.' +
-            '<span class="tt-label">Tracks shown:</span>Hypothetical Protein + Core/Accessory + Conservation + Avg Consistency' },
+            '<span class="tt-label">Tracks shown:</span>Hypothetical Protein + Core/Accessory + Conservation + Avg Consistency' +
+            '<span class="tt-label">Example use case:</span>Find core genes (>95% conservation) annotated as hypothetical with low consistency scores. These are high-value targets because they\'re essential but poorly understood.' },
         { id: 'annotation_quality', name: 'Annotation Quality',
           tracks: ['agreement', 'avg_cons', 'specificity', 'is_hypo'],
           sort: 'low_consistency',
@@ -1730,7 +1731,9 @@
           desc: '<strong>Annotation Quality Assessment</strong>' +
             '<span class="tt-label">Purpose:</span>Evaluate the reliability of functional annotations. Spots genes where annotation tools disagree, consistency is low, or specificity is poor.' +
             '<span class="tt-label">What to look for:</span>Genes sorted by lowest consistency first. Red cells = potential annotation problems. Look for patterns: do certain function types consistently show disagreement?' +
-            '<span class="tt-label">Tracks shown:</span>RAST/Bakta Agreement + Avg Consistency + Specificity + Hypothetical Flag' },
+            '<span class="tt-label">Tracks shown:</span>RAST/Bakta Agreement + Avg Consistency + Specificity + Hypothetical Flag' +
+            '<span class="tt-label">Agreement colors:</span>Green = both agree on function, Purple = both say hypothetical, Orange = one hypothetical/one function, Red = disagree on function' +
+            '<span class="tt-label">Example use case:</span>Genes with "Disagree" status and low consistency may have unreliable annotations. Prioritize these for manual curation or re-annotation.' },
         { id: 'metabolic', name: 'Metabolic Landscape',
           tracks: ['n_ec', 'n_modules', 'ec_cons', 'ec_map_cons'],
           sort: null,
@@ -1738,7 +1741,9 @@
           desc: '<strong>Metabolic Landscape</strong>' +
             '<span class="tt-label">Purpose:</span>Visualize which genes have enzymatic activity, participate in metabolic modules, and how consistent their enzyme classifications are.' +
             '<span class="tt-label">What to look for:</span>Dark bands in # EC and Module Hits indicate metabolic gene clusters. Compare EC Consistency vs EC Mapped Consistency to find genes where the EC assignment depends on the mapping method.' +
-            '<span class="tt-label">Tracks shown:</span># EC Numbers + KEGG Module Hits + EC Consistency + EC Mapped Consistency' },
+            '<span class="tt-label">Tracks shown:</span># EC Numbers + KEGG Module Hits + EC Consistency + EC Mapped Consistency' +
+            '<span class="tt-label">EC Mapped vs EC Consistency:</span>EC Mapped uses reaction-gene mapping from metabolic model. Regular EC uses direct annotation. Differences reveal model-specific enzyme assignments.' +
+            '<span class="tt-label">Example use case:</span>Genes with many EC numbers but low EC consistency may represent multi-functional enzymes or promiscuous annotations. Cross-reference with Metabolic Map tab to visualize on pathways.' },
         { id: 'pangenome', name: 'Pangenome Structure',
           tracks: ['conservation', 'pan_category', 'cluster_size', 'strand'],
           sort: 'conservation',
@@ -1746,7 +1751,9 @@
           desc: '<strong>Pangenome Structure</strong>' +
             '<span class="tt-label">Purpose:</span>Understand the pangenome architecture: which genes are core vs accessory, how large their gene families are, and where they sit in the genome.' +
             '<span class="tt-label">What to look for:</span>Compare conservation fraction with cluster size. High conservation + small cluster = single-copy essential gene. High conservation + large cluster = expanded gene family with paralogs. Low conservation + small cluster = strain-specific gene.' +
-            '<span class="tt-label">Tracks shown:</span>Conservation + Core/Accessory + Cluster Size + Strand' },
+            '<span class="tt-label">Tracks shown:</span>Conservation + Core/Accessory + Cluster Size + Strand' +
+            '<span class="tt-label">Cluster Size:</span>Number of genomes in the pangenome containing orthologous genes in this cluster. Larger = more widespread gene family.' +
+            '<span class="tt-label">Example use case:</span>Large cluster size + high conservation = ancient gene family present across many genomes. Small cluster + low conservation = recent horizontal gene transfer or lineage-specific innovation.' },
         { id: 'annotation_depth', name: 'Knowledge Coverage',
           tracks: ['has_name', 'n_ko', 'n_go', 'n_pfam', 'n_ec'],
           sort: 'annotation_quality',
@@ -1754,7 +1761,9 @@
           desc: '<strong>Knowledge Coverage</strong>' +
             '<span class="tt-label">Purpose:</span>See how deeply each gene is characterized across different databases. Well-studied genes have annotations from multiple sources.' +
             '<span class="tt-label">What to look for:</span>Genes with all dark bands are well-characterized across all databases. Genes with all light bands are poorly studied. Mixed patterns (e.g., has KO but no Pfam) reveal database-specific coverage gaps.' +
-            '<span class="tt-label">Tracks shown:</span>Has Gene Name + # KO + # GO + # Pfam + # EC' },
+            '<span class="tt-label">Tracks shown:</span>Has Gene Name + # KO + # GO + # Pfam + # EC' +
+            '<span class="tt-label">Annotation Depth sort:</span>Composite score = sum of (N_KO + N_COG + N_PFAM + N_GO + N_EC) + has_name. Higher = more deeply annotated.' +
+            '<span class="tt-label">Example use case:</span>Genes with 0 across all sources are completely unknown. Genes with high counts in multiple sources are well-studied with reliable functional predictions.' },
         { id: 'consistency_compare', name: 'Consistency Comparison',
           tracks: ['rast_cons', 'ko_cons', 'bakta_cons', 'ec_cons', 'go_cons'],
           sort: 'low_consistency',
@@ -1762,7 +1771,9 @@
           desc: '<strong>Consistency Source Comparison</strong>' +
             '<span class="tt-label">Purpose:</span>Compare how each annotation source (RAST, KO, Bakta, EC, GO) rates gene consistency within pangenome clusters. Sources may disagree on the same gene.' +
             '<span class="tt-label">What to look for:</span>Genes where one source is green but another is red. GO consistency tends to be higher (broader terms). EC consistency has more gray (many genes lack EC). RAST and Bakta should loosely agree but use different naming.' +
-            '<span class="tt-label">Tracks shown:</span>RAST + KO + Bakta + EC + GO Consistency' },
+            '<span class="tt-label">Tracks shown:</span>RAST + KO + Bakta + EC + GO Consistency' +
+            '<span class="tt-label">Consistency formula:</span>For each gene, compare its annotation to orthologs in same pangenome cluster. 1.0 (green) = all agree, 0.0 (red) = no agreement, N/A (gray) = no cluster or no data.' +
+            '<span class="tt-label">Example use case:</span>A gene with high RAST consistency (green) but low KO consistency (red) suggests RAST annotation is more stable across orthologs. Use the more consistent source for functional inference.' },
     ];
 
     let activeView = null;
