@@ -833,19 +833,31 @@
                 </div>
             </div>
             <div class="sidebar-section">
-                <div class="sidebar-section-title">
+                <div class="sidebar-section-title" onclick="toggleSidebarSection(this)">
                     <span>Legend</span>
                     <span class="toggle-icon">&#9660;</span>
                 </div>
                 <div class="metabolic-legend" id="metabolic-legend"></div>
             </div>
             <div class="sidebar-section">
-                <div class="sidebar-section-title">
+                <div class="sidebar-section-title" onclick="toggleSidebarSection(this)">
                     <span>Stats</span>
                     <span class="toggle-icon">&#9660;</span>
                 </div>
                 <div style="padding: 8px 12px; font-size: 11px; color: var(--kb-base); line-height: 1.6;" id="metabolic-stats">
                     Loading...
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title" onclick="toggleSidebarSection(this)">
+                    <span>Actions</span>
+                    <span class="toggle-icon">&#9660;</span>
+                </div>
+                <div class="action-item" onclick="exportReactions()" style="padding: 8px 12px; cursor: pointer;">
+                    <span class="icon">&#8595;</span> Export reactions (CSV)
+                </div>
+                <div class="action-item" onclick="toggleReactionTable()" style="padding: 8px 12px; cursor: pointer;">
+                    <span class="icon" id="table-toggle-icon">&#9776;</span> <span id="table-toggle-text">Show reaction table</span>
                 </div>
             </div>
             <div class="sidebar-section">
@@ -858,19 +870,7 @@
                 </div>
             </div>
             <div class="sidebar-section">
-                <div class="sidebar-section-title">
-                    <span>Actions</span>
-                    <span class="toggle-icon">&#9660;</span>
-                </div>
-                <div class="action-item" onclick="exportReactions()" style="padding: 8px 12px; cursor: pointer;">
-                    <span class="icon">&#8595;</span> Export reactions (CSV)
-                </div>
-                <div class="action-item" onclick="toggleReactionTable()" style="padding: 8px 12px; cursor: pointer;">
-                    <span class="icon" id="table-toggle-icon">&#9776;</span> <span id="table-toggle-text">Show reaction table</span>
-                </div>
-            </div>
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">
+                <div class="sidebar-section-title" onclick="toggleSidebarSection(this)">
                     <span>Reaction Detail</span>
                     <span class="toggle-icon">&#9660;</span>
                 </div>
@@ -3109,10 +3109,11 @@
     function renderUnmappedReactions(onMapSet) {
         if (!reactionsData) return;
 
-        // Find all reactions NOT on the current map
+        // Find all reactions NOT on the current map (excluding exchange and sink reactions)
         const unmapped = [];
         for (const [rxnId, rxn] of Object.entries(reactionsData.reactions)) {
-            if (!onMapSet.has(rxnId)) {
+            // Filter out reactions on map, and also filter out exchange (EX_) and sink (SK_) reactions
+            if (!onMapSet.has(rxnId) && !rxnId.startsWith('EX_') && !rxnId.startsWith('SK_')) {
                 unmapped.push({ id: rxnId, ...rxn });
             }
         }
@@ -3131,13 +3132,12 @@
         const showAll = unmapped.length <= maxShow;
         const toShow = showAll ? unmapped : unmapped.slice(0, maxShow);
 
-        let html = `<div style="margin-bottom:6px; font-weight:600;">${unmapped.length} reactions not visualized:</div>`;
+        let html = `<div style="margin-bottom:6px; font-weight:600;">${unmapped.length} reactions not visualized (excluding exchange/sink):</div>`;
         html += '<div style="font-family: monospace; line-height: 1.6;">';
 
         for (const rxn of toShow) {
-            const isExchange = rxn.id.startsWith('EX_');
             const hasGenes = rxn.genes && rxn.genes.trim() !== '';
-            const label = isExchange ? '(exchange)' : hasGenes ? `(${rxn.genes.split(/\s+or\s+|\s+and\s+/).length} genes)` : '(no genes)';
+            const label = hasGenes ? `(${rxn.genes.split(/\s+or\s+|\s+and\s+/).length} genes)` : '(no genes)';
             html += `<div style="margin-bottom:2px;"><span style="color:var(--kb-accent)">${rxn.id}</span> <span style="color:#9D9389; font-size:9px;">${label}</span></div>`;
         }
 
@@ -3166,20 +3166,20 @@
 
         const unmapped = [];
         for (const [rxnId, rxn] of Object.entries(reactionsData.reactions)) {
-            if (!onMapSet.has(rxnId)) {
+            // Filter out exchange (EX_) and sink (SK_) reactions
+            if (!onMapSet.has(rxnId) && !rxnId.startsWith('EX_') && !rxnId.startsWith('SK_')) {
                 unmapped.push({ id: rxnId, ...rxn });
             }
         }
         unmapped.sort((a, b) => a.id.localeCompare(b.id));
 
         const el = document.getElementById('metabolic-unmapped');
-        let html = `<div style="margin-bottom:6px; font-weight:600;">${unmapped.length} reactions not visualized:</div>`;
+        let html = `<div style="margin-bottom:6px; font-weight:600;">${unmapped.length} reactions not visualized (excluding exchange/sink):</div>`;
         html += '<div style="font-family: monospace; line-height: 1.6;">';
 
         for (const rxn of unmapped) {
-            const isExchange = rxn.id.startsWith('EX_');
             const hasGenes = rxn.genes && rxn.genes.trim() !== '';
-            const label = isExchange ? '(exchange)' : hasGenes ? `(${rxn.genes.split(/\s+or\s+|\s+and\s+/).length} genes)` : '(no genes)';
+            const label = hasGenes ? `(${rxn.genes.split(/\s+or\s+|\s+and\s+/).length} genes)` : '(no genes)';
             html += `<div style="margin-bottom:2px;"><span style="color:var(--kb-accent)">${rxn.id}</span> <span style="color:#9D9389; font-size:9px;">${label}</span></div>`;
         }
 
