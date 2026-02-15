@@ -931,6 +931,12 @@
                             <option value="flux_min">Flux (minimal)</option>
                         </select>
                     </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span>Search:</span>
+                        <input type="text" id="rxn-table-search" placeholder="ID, equation, or gene..."
+                               style="padding: 4px 8px; border: 1px solid var(--kb-base-lighter); border-radius: 4px; font-size: 11px; width: 200px;"
+                               oninput="filterReactionTable()">
+                    </div>
                     <span id="rxn-table-count" style="margin-left: auto; font-weight: 600; color: var(--kb-primary);"></span>
                 </div>
                 <div style="overflow: auto; flex: 1;">
@@ -1703,6 +1709,10 @@
             const response = await fetch(genesFile);
             genes = await response.json();
             sortedIndices = genes.map((_, i) => i);
+
+            // Load reactions data for metabolic tracks (but not Escher maps yet)
+            await loadReactionsData();
+
             init();
         } catch (e) {
             console.error('Failed to load data:', e);
@@ -3383,24 +3393,39 @@
         });
     }
 
-    async function loadMetabolicData() {
-        const loading = document.getElementById('metabolic-loading');
-        loading.textContent = 'Loading Escher library and reaction data...';
+    // Load just reactions data (for metabolic tracks) - called on page load
+    async function loadReactionsData() {
         try {
             const rxnFile = (CONFIG && CONFIG.data_files && CONFIG.data_files.reactions) || 'reactions_data.json';
+            const rxnResp = await fetch(rxnFile);
+            reactionsData = await rxnResp.json();
+            computeGeneMetabolicProperties();  // Compute flux/class for each gene
+            console.log('✓ Loaded reactions data:', Object.keys(reactionsData.reactions).length, 'reactions');
+        } catch (e) {
+            console.warn('Reactions data not available:', e);
+            // Not a critical error - metabolic tracks just won't work
+        }
+    }
+
+    async function loadMetabolicData() {
+        const loading = document.getElementById('metabolic-loading');
+        loading.textContent = 'Loading Escher library and metabolic map...';
+        try {
+            // Reactions data already loaded during page init, just load Escher + map
+            if (!reactionsData) {
+                await loadReactionsData();  // Fallback if it failed earlier
+            }
+
             const mapConfig = (CONFIG && CONFIG.data_files && CONFIG.data_files.metabolic_maps && CONFIG.data_files.metabolic_maps[currentMapId]) || {};
             const mapFile = mapConfig.file || 'metabolic_map_full.json';
 
-            const [_, rxnResp, mapResp] = await Promise.all([
+            const [_, mapResp] = await Promise.all([
                 loadEscherLibrary(),
-                fetch(rxnFile),
                 fetch(mapFile)
             ]);
-            reactionsData = await rxnResp.json();
             const mapData = await mapResp.json();
             cachedMaps[currentMapId] = mapData;
             metabolicLoaded = true;
-            computeGeneMetabolicProperties();  // Compute flux/class for each gene
             loading.style.display = 'none';
             initEscherMap(mapData);
             renderMetabolicStats();
