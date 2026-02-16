@@ -2918,6 +2918,31 @@
             const treeFile = (CONFIG && CONFIG.data_files && CONFIG.data_files.tree) || 'tree_data.json';
             const resp = await fetch(treeFile);
             treeData = await resp.json();
+
+            // Load reference genome stats
+            if (CONFIG && CONFIG.data_files && CONFIG.data_files.ref_genomes) {
+                try {
+                    const refGenomesResp = await fetch(CONFIG.data_files.ref_genomes);
+                    const refGenomesData = await refGenomesResp.json();
+
+                    // Merge ref genome stats into tree_data
+                    Object.entries(refGenomesData.genomes).forEach(([genomeId, stats]) => {
+                        if (!treeData.genome_metadata[genomeId]) {
+                            treeData.genome_metadata[genomeId] = {};
+                        }
+                        if (!treeData.genome_metadata[genomeId].stats) {
+                            treeData.genome_metadata[genomeId].stats = {};
+                        }
+                        // Merge stats
+                        Object.assign(treeData.genome_metadata[genomeId].stats, stats);
+                    });
+
+                    console.log(`Loaded stats for ${Object.keys(refGenomesData.genomes).length} reference genomes`);
+                } catch (e) {
+                    console.warn('ref_genomes_data.json not available:', e);
+                }
+            }
+
             treeLoaded = true;
 
             // Load cluster data if needed for missing_core computation
@@ -2931,7 +2956,7 @@
                 }
             }
 
-            // Compute missing_core stat for each genome
+            // Compute missing_core stat for user genome only
             computeMissingCoreStats();
 
             renderTreeSidebar();

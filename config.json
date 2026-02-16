@@ -7,6 +7,7 @@
     "tree": "tree_data.json",
     "cluster": "cluster_data.json",
     "reactions": "reactions_data.json",
+    "ref_genomes": "ref_genomes_data.json",
     "metabolic_maps": {
       "full": { "file": "metabolic_map_full.json", "name": "Global Metabolism" },
       "core": { "file": "metabolic_map_core.json", "name": "Core Metabolism" }
