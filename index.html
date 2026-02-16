@@ -3946,21 +3946,22 @@
             return;
         }
 
-        // Analyze KEGG module coverage from N_MODULES field
-        // Count genes with 0, 1, 2-5, 6-10, 10+ modules
-        const moduleCounts = { 'none': 0, 'low': 0, 'medium': 0, 'high': 0 };
         const totalGenes = genes.length;
 
+        // Count genes with KO annotations (metabolic genes)
+        // Use N_KO as proxy since N_MODULES may not be populated
+        const koCount = { 'none': 0, 'low': 0, 'medium': 0, 'high': 0 };
+
         genes.forEach(g => {
-            const nModules = g[F.N_MODULES] || 0;
-            if (nModules === 0) moduleCounts.none++;
-            else if (nModules === 1) moduleCounts.low++;
-            else if (nModules <= 5) moduleCounts.medium++;
-            else moduleCounts.high++;
+            const nKO = g[F.N_KO] || 0;
+            if (nKO === 0) koCount.none++;
+            else if (nKO === 1) koCount.low++;
+            else if (nKO <= 3) koCount.medium++;
+            else koCount.high++;
         });
 
         // Calculate metabolic coverage statistics
-        const metabolicGenes = totalGenes - moduleCounts.none;
+        const metabolicGenes = totalGenes - koCount.none;
         const metabolicPct = ((metabolicGenes / totalGenes) * 100).toFixed(1);
 
         // Count genes with EC, KO annotations (pathway-relevant)
@@ -3984,7 +3985,7 @@
                 <div style="font-weight:600; margin-bottom:6px; color:var(--kb-base-dark);">Metabolic Coverage</div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;">
                     <div style="padding:6px; background:var(--kb-base-lightest); border-radius:3px;">
-                        <div style="font-size:10px; color:var(--kb-base); margin-bottom:2px;">With KEGG Modules</div>
+                        <div style="font-size:10px; color:var(--kb-base); margin-bottom:2px;">KEGG Annotated</div>
                         <div style="font-size:16px; font-weight:700; color:#3b82f6;">${metabolicGenes}</div>
                         <div style="font-size:9px; color:var(--kb-base);">${metabolicPct}% of genome</div>
                     </div>
@@ -4019,23 +4020,23 @@
             </div>
 
             <div>
-                <div style="font-weight:600; margin-bottom:6px; color:var(--kb-base-dark);">Module Distribution</div>
+                <div style="font-weight:600; margin-bottom:6px; color:var(--kb-base-dark);">KEGG Annotation Depth</div>
                 <div style="font-size:10px; line-height:1.6;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                        <span style="color:var(--kb-base);">No modules:</span>
-                        <span style="font-weight:600; color:var(--kb-base-dark);">${moduleCounts.none} genes</span>
+                        <span style="color:var(--kb-base);">No KO terms:</span>
+                        <span style="font-weight:600; color:var(--kb-base-dark);">${koCount.none} genes</span>
                     </div>
                     <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                        <span style="color:var(--kb-base);">1 module:</span>
-                        <span style="font-weight:600; color:var(--kb-base-dark);">${moduleCounts.low} genes</span>
+                        <span style="color:var(--kb-base);">1 KO term:</span>
+                        <span style="font-weight:600; color:var(--kb-base-dark);">${koCount.low} genes</span>
                     </div>
                     <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                        <span style="color:var(--kb-base);">2-5 modules:</span>
-                        <span style="font-weight:600; color:var(--kb-base-dark);">${moduleCounts.medium} genes</span>
+                        <span style="color:var(--kb-base);">2-3 KO terms:</span>
+                        <span style="font-weight:600; color:var(--kb-base-dark);">${koCount.medium} genes</span>
                     </div>
                     <div style="display:flex; justify-content:space-between;">
-                        <span style="color:var(--kb-base);">6+ modules:</span>
-                        <span style="font-weight:600; color:var(--kb-base-dark);">${moduleCounts.high} genes</span>
+                        <span style="color:var(--kb-base);">4+ KO terms:</span>
+                        <span style="font-weight:600; color:var(--kb-base-dark);">${koCount.high} genes</span>
                     </div>
                 </div>
             </div>
