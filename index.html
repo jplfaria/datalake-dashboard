@@ -902,6 +902,15 @@
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-title" onclick="toggleSidebarSection(this)">
+                    <span>Pathway Coverage</span>
+                    <span class="toggle-icon">&#9660;</span>
+                </div>
+                <div style="padding: 8px 12px; font-size: 11px; color: var(--kb-base); line-height: 1.5;" id="pathway-coverage">
+                    Loading...
+                </div>
+            </div>
+            <div class="sidebar-section collapsed">
+                <div class="sidebar-section-title" onclick="toggleSidebarSection(this)">
                     <span>Unmapped Reactions</span>
                     <span class="toggle-icon">&#9660;</span>
                 </div>
@@ -937,6 +946,8 @@
                             <option value="not_on_map">Not on map</option>
                             <option value="has_genes">With genes</option>
                             <option value="no_genes">No genes</option>
+                            <option value="gapfilled">Gapfilled only</option>
+                            <option value="gene_supported">Gene-supported only</option>
                             <option value="exchange">Exchange/Sink only</option>
                         </select>
                     </div>
@@ -3610,6 +3621,7 @@
             initEscherMap(mapData);
             renderMetabolicStats();
             renderMetabolicLegend();
+            renderPathwayCoverage();
             updateMetabolicToolbar();
         } catch (e) {
             console.error('Failed to load metabolic data:', e);
@@ -3926,6 +3938,117 @@
         el.innerHTML = html;
     }
 
+    function renderPathwayCoverage() {
+        const container = document.getElementById('pathway-coverage');
+
+        if (!genes || genes.length === 0) {
+            container.innerHTML = '<span style="color:#9D9389;">No gene data loaded</span>';
+            return;
+        }
+
+        // Analyze KEGG module coverage from N_MODULES field
+        // Count genes with 0, 1, 2-5, 6-10, 10+ modules
+        const moduleCounts = { 'none': 0, 'low': 0, 'medium': 0, 'high': 0 };
+        const totalGenes = genes.length;
+
+        genes.forEach(g => {
+            const nModules = g[F.N_MODULES] || 0;
+            if (nModules === 0) moduleCounts.none++;
+            else if (nModules === 1) moduleCounts.low++;
+            else if (nModules <= 5) moduleCounts.medium++;
+            else moduleCounts.high++;
+        });
+
+        // Calculate metabolic coverage statistics
+        const metabolicGenes = totalGenes - moduleCounts.none;
+        const metabolicPct = ((metabolicGenes / totalGenes) * 100).toFixed(1);
+
+        // Count genes with EC, KO annotations (pathway-relevant)
+        const withEC = genes.filter(g => g[F.N_EC] > 0).length;
+        const withKO = genes.filter(g => g[F.N_KO] > 0).length;
+        const ecPct = ((withEC / totalGenes) * 100).toFixed(1);
+        const koPct = ((withKO / totalGenes) * 100).toFixed(1);
+
+        // Get gapfilled reactions count
+        let gapfilledCount = 0;
+        if (reactionsData && reactionsData.reactions) {
+            for (const rxn of Object.values(reactionsData.reactions)) {
+                if (rxn.gapfilling && rxn.gapfilling !== 'none') {
+                    gapfilledCount++;
+                }
+            }
+        }
+
+        let html = `
+            <div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--kb-base-lightest);">
+                <div style="font-weight:600; margin-bottom:6px; color:var(--kb-base-dark);">Metabolic Coverage</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;">
+                    <div style="padding:6px; background:var(--kb-base-lightest); border-radius:3px;">
+                        <div style="font-size:10px; color:var(--kb-base); margin-bottom:2px;">With KEGG Modules</div>
+                        <div style="font-size:16px; font-weight:700; color:#3b82f6;">${metabolicGenes}</div>
+                        <div style="font-size:9px; color:var(--kb-base);">${metabolicPct}% of genome</div>
+                    </div>
+                    <div style="padding:6px; background:var(--kb-base-lightest); border-radius:3px;">
+                        <div style="font-size:10px; color:var(--kb-base); margin-bottom:2px;">Gapfilled</div>
+                        <div style="font-size:16px; font-weight:700; color:#f59e0b;">${gapfilledCount}</div>
+                        <div style="font-size:9px; color:var(--kb-base);">reactions inferred</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--kb-base-lightest);">
+                <div style="font-weight:600; margin-bottom:6px; color:var(--kb-base-dark);">Annotation Depth</div>
+                <div style="margin-bottom:6px;">
+                    <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:2px;">
+                        <span>KEGG Orthology (KO)</span>
+                        <span style="font-weight:600;">${withKO} (${koPct}%)</span>
+                    </div>
+                    <div style="background:var(--kb-base-lightest); height:12px; border-radius:2px; overflow:hidden;">
+                        <div style="background:#8b5cf6; height:100%; width:${koPct}%; opacity:0.8;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div style="display:flex; justify-content:space-between; font-size:10px; margin-bottom:2px;">
+                        <span>EC Numbers</span>
+                        <span style="font-weight:600;">${withEC} (${ecPct}%)</span>
+                    </div>
+                    <div style="background:var(--kb-base-lightest); height:12px; border-radius:2px; overflow:hidden;">
+                        <div style="background:#22c55e; height:100%; width:${ecPct}%; opacity:0.8;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div style="font-weight:600; margin-bottom:6px; color:var(--kb-base-dark);">Module Distribution</div>
+                <div style="font-size:10px; line-height:1.6;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:var(--kb-base);">No modules:</span>
+                        <span style="font-weight:600; color:var(--kb-base-dark);">${moduleCounts.none} genes</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:var(--kb-base);">1 module:</span>
+                        <span style="font-weight:600; color:var(--kb-base-dark);">${moduleCounts.low} genes</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:var(--kb-base);">2-5 modules:</span>
+                        <span style="font-weight:600; color:var(--kb-base-dark);">${moduleCounts.medium} genes</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--kb-base);">6+ modules:</span>
+                        <span style="font-weight:600; color:var(--kb-base-dark);">${moduleCounts.high} genes</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:12px; padding:8px; background:#fef3c7; border-left:3px solid #f59e0b; border-radius:3px; font-size:10px; line-height:1.4;">
+                <div style="font-weight:600; margin-bottom:4px; color:#92400e;">Gapfilled Reactions</div>
+                <div style="color:#92400e;">Reactions shown with dashed outline are computationally inferred (no gene support). Filter by gapfilling status in reaction table.</div>
+            </div>
+        `;
+
+        container.innerHTML = html;
+    }
+
     function exportReactions() {
         if (!reactionsData) {
             alert('Reactions data not loaded yet');
@@ -4013,6 +4136,7 @@
             const hasGenes = rxn.genes && rxn.genes.trim() !== '';
             const isExchange = rxnId.startsWith('EX_') || rxnId.startsWith('SK_');
             const isOnMap = onMapSet.has(rxnId);
+            const isGapfilled = rxn.gapfilling && rxn.gapfilling !== 'none';
 
             // Apply dropdown filter
             switch (filter) {
@@ -4022,6 +4146,8 @@
                 case 'not_on_map': include = !isOnMap; break;
                 case 'has_genes': include = hasGenes; break;
                 case 'no_genes': include = !hasGenes; break;
+                case 'gapfilled': include = isGapfilled; break;
+                case 'gene_supported': include = !isGapfilled && hasGenes; break;
                 case 'exchange': include = isExchange; break;
             }
 
@@ -4063,9 +4189,11 @@
                 const classR = rxn.class_rich || '-';
                 const fluxM = (rxn.flux_min || 0).toFixed(3);
                 const classM = rxn.class_min || '-';
+                const isGapfilled = rxn.gapfilling && rxn.gapfilling !== 'none';
+                const gapfillBadge = isGapfilled ? '<span style="background:#fbbf24; color:#78350f; padding:1px 4px; border-radius:2px; font-size:9px; font-weight:600; margin-left:4px;">GAP</span>' : '';
 
-                html += `<tr>
-                    <td class="rxn-id-col" title="${eq}">${rxn.id}</td>
+                html += `<tr${isGapfilled ? ' style="background:#fef3c722;"' : ''}>
+                    <td class="rxn-id-col" title="${eq}">${rxn.id}${gapfillBadge}</td>
                     <td class="rxn-eq-col" title="${eq}">${eq}</td>
                     <td class="rxn-genes-col" title="${genes}">${genes}</td>
                     <td>${cons}</td>
@@ -4101,6 +4229,7 @@
         if (cachedMaps[currentMapId]) {
             initEscherMap(cachedMaps[currentMapId]);
             renderMetabolicStats();
+            renderPathwayCoverage();
             updateMetabolicToolbar();
         } else {
             const mapConfig = (CONFIG && CONFIG.data_files && CONFIG.data_files.metabolic_maps && CONFIG.data_files.metabolic_maps[currentMapId]) || {};
@@ -4111,6 +4240,7 @@
                 cachedMaps[currentMapId] = mapData;
                 initEscherMap(mapData);
                 renderMetabolicStats();
+                renderPathwayCoverage();
                 updateMetabolicToolbar();
             } catch (e) {
                 console.error('Failed to load map:', e);
