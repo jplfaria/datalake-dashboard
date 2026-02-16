@@ -1706,12 +1706,12 @@
             desc: 'Number of contiguous DNA sequences (contigs) in the genome assembly. Lower is better - fewer contigs indicates a more complete, higher-quality assembly. A value of 1 means a complete chromosome. High values (>100) suggest fragmented or draft-quality assemblies.'
         },
         {
-            id: 'hypo_pct',
-            name: 'Hypothetical %',
-            short: 'Hypo %',
+            id: 'missing_core',
+            name: 'Missing Core Genes',
+            short: 'Missing Core',
             color: '#ef4444',
-            enabled: false,
-            desc: 'Percentage of genes annotated as "hypothetical protein" or with no assigned function. Lower is better - indicates more complete functional annotation. User genome only (reference genomes lack detailed annotation data in this view).'
+            enabled: true,
+            desc: 'Number of core pangenome clusters that are absent from this genome. Core clusters are those present in >95% of reference genomes. A genome missing many core genes may indicate: (1) assembly gaps/incompleteness, (2) genuine gene loss in this lineage, or (3) highly divergent orthologs not detected by clustering. Zero missing = genome contains all expected core genes.'
         },
         {
             id: 'ko_pct',
@@ -2919,12 +2919,66 @@
             const resp = await fetch(treeFile);
             treeData = await resp.json();
             treeLoaded = true;
+
+            // Load cluster data if needed for missing_core computation
+            if (!clusterData) {
+                try {
+                    const clusterFile = (CONFIG && CONFIG.data_files && CONFIG.data_files.cluster) || 'cluster_data.json';
+                    const clusterResp = await fetch(clusterFile);
+                    clusterData = await clusterResp.json();
+                } catch (e) {
+                    console.warn('cluster_data.json not available for missing_core computation');
+                }
+            }
+
+            // Compute missing_core stat for each genome
+            computeMissingCoreStats();
+
             renderTreeSidebar();
             renderTree();
         } catch (e) {
             console.error('Failed to load tree data:', e);
             document.getElementById('tree-info').textContent = 'Error loading tree_data.json';
         }
+    }
+
+    function computeMissingCoreStats() {
+        if (!treeData || !genes) return;
+
+        // Count expected core genes (those present in >95% of genomes)
+        // We use pan_category === 2 (Core) as the marker
+        const userCoreGenes = genes.filter(g => g[F.PAN_CAT] === 2).length;
+
+        // Estimate total expected core genes from the highest conservation fraction
+        // Genes with conservation > 0.95 are considered core
+        const expectedCoreCount = genes.filter(g => g[F.CONS_FRAC] > 0.95).length;
+
+        // For now, we can only accurately compute this for the user genome
+        // Reference genomes would need data from pan_genome_features table
+        Object.keys(treeData.genome_metadata || {}).forEach(genomeId => {
+            const meta = treeData.genome_metadata[genomeId];
+            if (!meta.stats) meta.stats = {};
+
+            if (genomeId === treeData.user_genome_id) {
+                // User genome: count genes with pan_category != 2 but conservation_frac > 0.95
+                // These are core genes this genome is missing
+                let missing = 0;
+                const coreThreshold = 0.95;
+
+                // Count how many genes are marked as core based on pangenome
+                const allCoreCount = genes.filter(g => g[F.CONS_FRAC] > coreThreshold).length;
+                const userHasCore = genes.filter(g => g[F.PAN_CAT] === 2).length;
+
+                // Missing core = difference
+                missing = Math.max(0, allCoreCount - userHasCore);
+
+                meta.stats.missing_core = missing;
+            } else {
+                // Reference genomes: set to null (no data available)
+                // Will show as "-" in the tree view
+                meta.stats.missing_core = null;
+            }
+        });
     }
 
     function renderTreeSidebar() {
@@ -3121,7 +3175,7 @@
                 const barStart = labelWidth + treeWidth + statGap;
                 const barW = statBarWidth / enabledStats.length;
                 enabledStats.forEach((s, si) => {
-                    let val = 0;
+                    let val = null;
                     // Check meta.stats first (new structure), then meta directly, then genome_stats (legacy)
                     if (meta.stats && meta.stats[s.id] != null) {
                         val = meta.stats[s.id];
@@ -3131,13 +3185,19 @@
                         val = stats[s.id];
                     }
 
-                    const w = (val / statMaxes[s.id]) * (barW - 6);
                     const bx = barStart + si * barW;
                     // Background track
                     svg += `<rect x="${bx}" y="${y - 6}" width="${barW - 6}" height="12" fill="#F2EFEB" rx="1"/>`;
-                    // Value bar (only draw if value > 0)
-                    if (w > 0) {
-                        svg += `<rect x="${bx}" y="${y - 6}" width="${w}" height="12" fill="${s.color}" opacity="0.7" rx="1"/>`;
+
+                    if (val === null) {
+                        // Show "-" for missing data
+                        svg += `<text x="${bx + (barW - 6)/2}" y="${y + 4}" text-anchor="middle" font-size="10" fill="#9D9389">-</text>`;
+                    } else {
+                        // Value bar (only draw if value > 0)
+                        const w = (val / statMaxes[s.id]) * (barW - 6);
+                        if (w > 0) {
+                            svg += `<rect x="${bx}" y="${y - 6}" width="${w}" height="12" fill="${s.color}" opacity="0.7" rx="1"/>`;
+                        }
                     }
                 });
             }
