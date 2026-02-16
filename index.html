@@ -1628,11 +1628,70 @@
 
     // Tree stat bar config
     const TREE_STATS = [
-        { id: 'n_genes', name: 'Gene Count', short: 'Genes', color: '#3b82f6', enabled: true },
-        { id: 'n_clusters', name: 'Cluster Count', short: 'Clusters', color: '#8b5cf6', enabled: true },
-        { id: 'core_pct', name: 'Core %', short: 'Core %', color: '#22c55e', enabled: true },
-        { id: 'phenotype_pos', name: 'Positive Growth', short: 'Pos Growth', color: '#f97316', enabled: true },
-        { id: 'phenotype_neg', name: 'Negative Growth', short: 'Neg Growth', color: '#2563eb', enabled: true },
+        {
+            id: 'n_genes',
+            name: 'Gene Count',
+            short: 'Genes',
+            color: '#3b82f6',
+            enabled: true,
+            desc: 'Total number of genes in this genome. Includes protein-coding genes, tRNAs, rRNAs, and other genomic features. Higher counts may indicate larger genomes or more fragmented assemblies with duplicated genes.'
+        },
+        {
+            id: 'n_clusters',
+            name: 'Cluster Count',
+            short: 'Clusters',
+            color: '#8b5cf6',
+            enabled: true,
+            desc: 'Number of distinct pangenome clusters this genome contributes to. Each cluster represents a gene family (orthologs/paralogs across genomes). Ideally close to gene count; lower values suggest many duplicated genes.'
+        },
+        {
+            id: 'core_pct',
+            name: 'Core %',
+            short: 'Core %',
+            color: '#22c55e',
+            enabled: true,
+            desc: 'Percentage of genes in this genome that are "core" (present in >95% of reference genomes). Higher percentages indicate this genome contains mostly essential/conserved functions. Values >100% occur when a genome has multiple copies of core genes.'
+        },
+        {
+            id: 'n_contigs',
+            name: 'Assembly Contigs',
+            short: 'Contigs',
+            color: '#f59e0b',
+            enabled: true,
+            desc: 'Number of contiguous DNA sequences (contigs) in the genome assembly. Lower is better - fewer contigs indicates a more complete, higher-quality assembly. A value of 1 means a complete chromosome. High values (>100) suggest fragmented or draft-quality assemblies.'
+        },
+        {
+            id: 'hypo_pct',
+            name: 'Hypothetical %',
+            short: 'Hypo %',
+            color: '#ef4444',
+            enabled: false,
+            desc: 'Percentage of genes annotated as "hypothetical protein" or with no assigned function. Lower is better - indicates more complete functional annotation. User genome only (reference genomes lack detailed annotation data in this view).'
+        },
+        {
+            id: 'ko_pct',
+            name: 'KEGG Coverage',
+            short: 'KEGG %',
+            color: '#8b5cf6',
+            enabled: false,
+            desc: 'Percentage of genes with KEGG Orthology (KO) assignments. KO links genes to metabolic pathways and functional modules. Higher coverage indicates better metabolic annotation. User genome only.'
+        },
+        {
+            id: 'avg_consistency',
+            name: 'Avg Consistency',
+            short: 'Consistency',
+            color: '#f97316',
+            enabled: false,
+            desc: 'Average annotation consistency score across all genes. Measures how well gene annotations agree with orthologs in the same pangenome cluster. Higher scores (closer to 1.0) indicate more reliable annotations. User genome only.'
+        },
+        {
+            id: 'metabolic_genes',
+            name: 'Metabolic Genes',
+            short: 'Metabolic',
+            color: '#10b981',
+            enabled: false,
+            desc: 'Number of genes associated with metabolic reactions in the FBA model. Indicates metabolic capability - more genes typically means broader metabolic versatility. User genome only (requires genome-specific metabolic model).'
+        },
     ];
 
     // === TAB SWITCHING ===
@@ -2937,20 +2996,24 @@
             }
         }
 
-        // Stat bar scaling
+        // Stat bar scaling - check both genome_stats (legacy) and genome_metadata.stats (new)
         const statMaxes = {};
         enabledStats.forEach(s => {
             let mx = 0;
-            if (s.id === 'phenotype_pos' || s.id === 'phenotype_neg') {
-                // Phenotype data is in genome_metadata
-                Object.entries(d.genome_metadata).forEach(([gid, meta]) => {
-                    if (meta.phenotype) {
-                        const val = s.id === 'phenotype_pos' ? meta.phenotype.positive_growth : meta.phenotype.negative_growth;
-                        if (val > mx) mx = val;
-                    }
+            // Check genome_metadata.stats first (new structure)
+            Object.entries(d.genome_metadata || {}).forEach(([gid, meta]) => {
+                if (meta.stats && meta.stats[s.id] != null) {
+                    if (meta.stats[s.id] > mx) mx = meta.stats[s.id];
+                } else if (meta[s.id] != null) {
+                    // Fallback to direct metadata fields (n_contigs, etc.)
+                    if (meta[s.id] > mx) mx = meta[s.id];
+                }
+            });
+            // Also check genome_stats (legacy location)
+            if (d.genome_stats) {
+                Object.values(d.genome_stats).forEach(gs => {
+                    if (gs[s.id] != null && gs[s.id] > mx) mx = gs[s.id];
                 });
-            } else {
-                Object.values(d.genome_stats).forEach(gs => { if (gs[s.id] > mx) mx = gs[s.id]; });
             }
             statMaxes[s.id] = mx || 1;
         });
@@ -2995,31 +3058,41 @@
                 const barW = statBarWidth / enabledStats.length;
                 enabledStats.forEach((s, si) => {
                     let val = 0;
-                    if (s.id === 'phenotype_pos' || s.id === 'phenotype_neg') {
-                        // Get phenotype data from metadata
-                        if (meta.phenotype) {
-                            val = s.id === 'phenotype_pos' ? meta.phenotype.positive_growth : meta.phenotype.negative_growth;
-                        }
-                    } else {
-                        val = stats[s.id] || 0;
+                    // Check meta.stats first (new structure), then meta directly, then genome_stats (legacy)
+                    if (meta.stats && meta.stats[s.id] != null) {
+                        val = meta.stats[s.id];
+                    } else if (meta[s.id] != null) {
+                        val = meta[s.id];
+                    } else if (stats[s.id] != null) {
+                        val = stats[s.id];
                     }
+
                     const w = (val / statMaxes[s.id]) * (barW - 6);
                     const bx = barStart + si * barW;
                     // Background track
                     svg += `<rect x="${bx}" y="${y - 6}" width="${barW - 6}" height="12" fill="#F2EFEB" rx="1"/>`;
-                    // Value bar
-                    svg += `<rect x="${bx}" y="${y - 6}" width="${w}" height="12" fill="${s.color}" opacity="0.7" rx="1"/>`;
+                    // Value bar (only draw if value > 0)
+                    if (w > 0) {
+                        svg += `<rect x="${bx}" y="${y - 6}" width="${w}" height="12" fill="${s.color}" opacity="0.7" rx="1"/>`;
+                    }
                 });
             }
         });
 
-        // Stat bar headers
+        // Stat bar headers with clickable info icons
         if (enabledStats.length > 0) {
             const barStart = labelWidth + treeWidth + statGap;
             const barW = statBarWidth / enabledStats.length;
             enabledStats.forEach((s, si) => {
                 const bx = barStart + si * barW;
+                svg += `<g class="stat-header" data-stat-id="${s.id}">`;
                 svg += `<text x="${bx + (barW - 6)/2}" y="12" text-anchor="middle" font-size="9" fill="${s.color}" font-weight="600">${s.short || s.name}</text>`;
+                // Info icon
+                if (s.desc) {
+                    svg += `<circle cx="${bx + (barW - 6)/2 + 25}" cy="9" r="5" fill="${s.color}" opacity="0.2" class="stat-info-icon"/>`;
+                    svg += `<text x="${bx + (barW - 6)/2 + 25}" y="12" text-anchor="middle" font-size="8" fill="${s.color}" font-weight="700" style="cursor:help;">i</text>`;
+                }
+                svg += `</g>`;
             });
         }
 
@@ -3058,6 +3131,25 @@
                 tooltip.style.top = Math.max(10, rect.top - 30) + 'px';
             });
             leaf.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+        });
+
+        // Tooltips on stat header hover
+        container.querySelectorAll('.stat-header').forEach(header => {
+            header.addEventListener('mouseenter', (e) => {
+                const statId = header.dataset.statId;
+                const stat = TREE_STATS.find(s => s.id === statId);
+                if (stat && stat.desc) {
+                    tooltip.innerHTML = `
+                        <div style="font-weight:700; color:#66B1DB; margin-bottom:6px;">${stat.name}</div>
+                        <div style="font-size:11px; line-height:1.5;">${stat.desc}</div>
+                    `;
+                    tooltip.style.display = 'block';
+                    const rect = header.getBoundingClientRect();
+                    tooltip.style.left = (rect.left + 10) + 'px';
+                    tooltip.style.top = (rect.bottom + 5) + 'px';
+                }
+            });
+            header.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
         });
     }
 
