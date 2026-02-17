@@ -10,9 +10,9 @@ For each genome in the pangenome, compute:
 5. Functional annotation depth (EC, KO, GO, etc.)
 6. Annotation consistency (average across sources)
 
-Output: Updates tree_data.json with new genome_stats fields
+Output: Updates ../data/tree_data.json with new genome_stats fields
 
-NOTE: This script computes per-genome statistics from genes_data.json
+NOTE: This script computes per-genome statistics from ../data/genes_data.json
 which only contains the USER genome's genes. For reference genomes, we'll
 use aggregate statistics from the database pan_genome_features table.
 """
@@ -25,15 +25,15 @@ def extract_genome_stats():
     """Extract comprehensive statistics for all genomes"""
 
     # Load existing tree data
-    with open('tree_data.json', 'r') as f:
+    with open('../data/tree_data.json', 'r') as f:
         tree_data = json.load(f)
 
     # Load user genome genes data
-    with open('genes_data.json', 'r') as f:
+    with open('../data/genes_data.json', 'r') as f:
         user_genes = json.load(f)
 
     # Load reactions data for metabolic stats
-    with open('reactions_data.json', 'r') as f:
+    with open('../data/reactions_data.json', 'r') as f:
         reactions_data = json.load(f)
 
     # Connect to database for reference genome stats
@@ -46,7 +46,7 @@ def extract_genome_stats():
     genome_ids = tree_data['genome_ids']
     user_genome_id = reactions_data.get('user_genome')
 
-    # Field indices from genes_data.json (matching our extraction script)
+    # Field indices from ../data/genes_data.json (matching our extraction script)
     F = {
         'ID': 0, 'FID': 1, 'LENGTH': 2, 'START': 3, 'STRAND': 4,
         'CONS_FRAC': 5, 'PAN_CAT': 6, 'FUNC': 7,
@@ -62,7 +62,7 @@ def extract_genome_stats():
     for genome_id in genome_ids:
         print(f"\n{genome_id}:")
 
-        # For user genome, use genes_data.json
+        # For user genome, use ../data/genes_data.json
         if genome_id == user_genome_id:
             genes = user_genes
             total_genes = len(genes)
@@ -209,11 +209,11 @@ def extract_genome_stats():
     conn.close()
 
     # Save updated tree data
-    with open('tree_data.json', 'w') as f:
+    with open('../data/tree_data.json', 'w') as f:
         json.dump(tree_data, f, indent=2)
 
     print("\n" + "=" * 60)
-    print(f"✓ Updated tree_data.json with stats for {len(genome_ids)} genomes")
+    print(f"✓ Updated ../data/tree_data.json with stats for {len(genome_ids)} genomes")
     print("\nNew stats fields:")
     print("  - Pangenome: core_genes, accessory_genes, singleton_genes")
     print("  - Annotation: hypothetical, characterized, hypo_pct")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate reactions_data.json for the Genome Heatmap Viewer metabolic map tab.
+"""Generate ../data/reactions_data.json for the Genome Heatmap Viewer metabolic map tab.
 
 NEW IN v2.0: Reads from genome_reactions table in BERDL SQLite database instead
 of TSV file. Expands flux classes from 3 to 6 categories.
@@ -13,8 +13,8 @@ import sqlite3
 import sys
 
 DB_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/berdl_tables.db"
-GENES_DATA_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/genes_data.json"
-OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/reactions_data.json"
+GENES_DATA_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/../data/genes_data.json"
+OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/../data/reactions_data.json"
 
 
 def main():
@@ -88,7 +88,7 @@ def main():
 
     conn.close()
 
-    # --- Build gene index from genes_data.json ---
+    # --- Build gene index from ../data/genes_data.json ---
     # Map locus tags (from reaction.genes field) to gene indices
     print("Building gene index...")
     gene_index = {}

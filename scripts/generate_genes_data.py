@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate genes_data.json for the Genome Heatmap Viewer.
+"""Generate ../data/genes_data.json for the Genome Heatmap Viewer.
 
 Extracts gene features from a BERDL SQLite database and produces a compact
 JSON array ready for the viewer's multi-track heatmap.
@@ -27,7 +27,7 @@ from collections import defaultdict
 # ---------- Configuration ----------
 
 DB_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/berdl_tables.db"
-OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/genes_data.json"
+OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/../data/genes_data.json"
 
 # Localization categories (must match config.json categories.localization)
 LOC_CATEGORIES = [

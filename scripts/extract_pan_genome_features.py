@@ -6,7 +6,7 @@ This script extracts gene-level statistics for ALL genomes in the pangenome,
 not just the user genome. This enables displaying stats in the Tree view
 for reference genomes.
 
-Output: ref_genomes_data.json with stats for all genomes
+Output: ../data/ref_genomes_data.json with stats for all genomes
 """
 
 import sqlite3
@@ -28,10 +28,10 @@ def extract_pan_genome_features():
 
     # Load existing tree data to get genome IDs
     try:
-        with open('tree_data.json', 'r') as f:
+        with open('../data/tree_data.json', 'r') as f:
             tree_data = json.load(f)
     except FileNotFoundError:
-        print("Error: tree_data.json not found. Run generate_tree_data.py first.")
+        print("Error: ../data/tree_data.json not found. Run generate_tree_data.py first.")
         sys.exit(1)
 
     genome_ids = tree_data['genome_ids']
@@ -176,7 +176,7 @@ def extract_pan_genome_features():
     conn.close()
 
     # Save to file
-    output_file = 'ref_genomes_data.json'
+    output_file = '../data/ref_genomes_data.json'
     with open(output_file, 'w') as f:
         json.dump(ref_genomes_data, f, indent=2)
 

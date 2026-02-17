@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate tree_data.json for the Genome Heatmap Viewer dendrogram.
+"""Generate ../data/tree_data.json for the Genome Heatmap Viewer dendrogram.
 
 NEW IN v2.0: Handles split tables (genome_features + pan_genome_features).
 User genome ID is now dynamic (detected as 'user_*').
@@ -17,7 +17,7 @@ from scipy.cluster.hierarchy import leaves_list, linkage
 from scipy.spatial.distance import pdist, squareform
 
 DB_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/berdl_tables.db"
-OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/tree_data.json"
+OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/../data/tree_data.json"
 
 
 def main():

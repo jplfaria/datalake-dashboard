@@ -6,7 +6,7 @@ Extracts:
 2. Growth phenotype summary (model predictions)
 3. Genome comparison stats
 
-Output: summary_stats.json
+Output: ../data/summary_stats.json
 """
 
 import json
@@ -14,7 +14,7 @@ import sqlite3
 import sys
 
 DB_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/berdl_tables.db"
-OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/summary_stats.json"
+OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/../data/summary_stats.json"
 
 
 def main():

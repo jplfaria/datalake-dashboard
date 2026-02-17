@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate cluster_data.json for the Genome Heatmap Viewer UMAP scatter plot.
+"""Generate ../data/cluster_data.json for the Genome Heatmap Viewer UMAP scatter plot.
 
 Computes two UMAP embeddings of 4617 genes:
 1. Gene Features: conservation, consistency scores, annotation counts, etc.
@@ -13,11 +13,11 @@ import sys
 import numpy as np
 import umap
 
-GENES_DATA_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/genes_data.json"
+GENES_DATA_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/../data/genes_data.json"
 DB_PATH = "/Users/jplfaria/Downloads/berdl_tables_ontology_terms.db"
-OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/cluster_data.json"
+OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/../data/cluster_data.json"
 
-# Field indices from genes_data.json (29 fields per gene array)
+# Field indices from ../data/genes_data.json (29 fields per gene array)
 F = {
     "ID": 0, "FID": 1, "LENGTH": 2, "START": 3, "STRAND": 4,
     "CONS_FRAC": 5, "PAN_CAT": 6, "FUNC": 7,
@@ -42,7 +42,7 @@ def safe_float(val, default=0.0):
 
 def main():
     # --- Load gene data ---
-    print("Loading genes_data.json...")
+    print("Loading ../data/genes_data.json...")
     with open(GENES_DATA_PATH) as f:
         genes = json.load(f)
     n_genes = len(genes)
@@ -134,11 +134,11 @@ def main():
 
     for i, gene in enumerate(genes):
         # Gene's cluster IDs (could be semicolon-separated in the original data)
-        # But in genes_data.json, pan_category encodes: 0=unknown, 1=accessory, 2=core
+        # But in ../data/genes_data.json, pan_category encodes: 0=unknown, 1=accessory, 2=core
         # We need the actual cluster IDs. Let's use conservation + category as a proxy,
         # or better: look up cluster from genome_features
 
-        # Actually, we don't have cluster IDs in genes_data.json directly.
+        # Actually, we don't have cluster IDs in ../data/genes_data.json directly.
         # We'll use the feature-based approach as the primary and construct
         # a simulated presence vector from conservation fraction and category.
         cons = safe_float(gene[F["CONS_FRAC"]])

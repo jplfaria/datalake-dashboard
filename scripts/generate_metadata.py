@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate metadata.json for the Genome Heatmap Viewer.
+"""Generate ../data/metadata.json for the Genome Heatmap Viewer.
 
 Extracts genome-specific metadata from the database dynamically.
 This allows the viewer to work with any genome database without hardcoding.
@@ -11,7 +11,7 @@ import sqlite3
 import sys
 
 DB_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/berdl_tables.db"
-OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/metadata.json"
+OUTPUT_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/../data/metadata.json"
 
 
 def parse_organism_name(genome_id):

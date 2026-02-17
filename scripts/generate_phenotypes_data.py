@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate phenotype data for integration into genes_data.json.
+"""Generate phenotype data for integration into ../data/genes_data.json.
 
 This script extracts phenotype statistics from the gene_phenotypes table
 and adds two new fields to each gene:
@@ -15,7 +15,7 @@ import sys
 from collections import defaultdict
 
 DB_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/berdl_tables.db"
-GENES_DATA_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/genes_data.json"
+GENES_DATA_PATH = "/Users/jplfaria/repos/genome-heatmap-viewer/../data/genes_data.json"
 
 
 def main():
@@ -36,7 +36,7 @@ def main():
     user_genome_id = user_genome_row["id"]
     print(f"  User genome: {user_genome_id}")
 
-    # --- Step 2: Load existing genes_data.json ---
+    # --- Step 2: Load existing ../data/genes_data.json ---
     print(f"Loading {GENES_DATA_PATH}...")
     with open(GENES_DATA_PATH, "r") as f:
         genes_data = json.load(f)
@@ -97,7 +97,7 @@ def main():
     print(f"  {genes_with_phenotypes} genes have phenotype data")
     print(f"  {genes_with_fitness} genes have fitness scores")
 
-    # --- Step 5: Write updated genes_data.json ---
+    # --- Step 5: Write updated ../data/genes_data.json ---
     print(f"\nWriting updated {GENES_DATA_PATH}...")
     with open(GENES_DATA_PATH, "w") as f:
         json.dump(genes_data, f, separators=(",", ":"))
