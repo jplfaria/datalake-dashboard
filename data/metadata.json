@@ -1,10 +1,10 @@
 {
-  "organism": "Acinetobacter baylyi ADP1",
-  "genome_id": "user_Acinetobacter_baylyi_ADP1_RAST",
-  "genome_assembly": "Unknown",
-  "n_ref_genomes": 13,
-  "n_genes": 3235,
+  "organism": "Escherichia ruysiae",
+  "genome_id": "user_GCF_000005845.2.RAST",
+  "genome_assembly": "GCF_000005845.2",
+  "n_ref_genomes": 52,
+  "n_genes": 4140,
   "n_contigs": 1,
-  "taxonomy": "Unknown",
-  "database_type": "BERDL"
+  "taxonomy": "d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Enterobacterales;f__Enterobacteriaceae;g__Escherichia;s__Escherichia ruysiae",
+  "database_type": "GenomeDataLakeTables"
 }
