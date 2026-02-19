@@ -110,15 +110,49 @@ def main():
             WHERE genome_id = ? AND class = 'N'
         """, (user_genome_id,)).fetchone()[0] or 0
 
+        # Gap analysis
+        zero_gap = conn.execute("""
+            SELECT COUNT(*) FROM genome_phenotype
+            WHERE genome_id = ? AND gap_count = 0
+        """, (user_genome_id,)).fetchone()[0]
+
+        max_gaps = conn.execute("""
+            SELECT MAX(gap_count) FROM genome_phenotype
+            WHERE genome_id = ?
+        """, (user_genome_id,)).fetchone()[0] or 0
+
+        # Top gapfilled reactions across phenotypes
+        top_gapfilled = []
+        try:
+            for row in conn.execute("""
+                SELECT gapfilled_reactions, COUNT(*) as freq
+                FROM genome_phenotype
+                WHERE genome_id = ? AND gapfilled_reactions IS NOT NULL
+                    AND gapfilled_reactions != ''
+                GROUP BY gapfilled_reactions
+                ORDER BY freq DESC
+                LIMIT 10
+            """, (user_genome_id,)):
+                top_gapfilled.append({
+                    "reactions": row[0],
+                    "frequency": row[1]
+                })
+        except sqlite3.OperationalError:
+            pass
+
         summary["growth_phenotypes"] = {
             "positive_growth": positive,
             "negative_growth": negative,
             "avg_positive_gaps": round(avg_pos_gaps, 2),
             "avg_negative_gaps": round(avg_neg_gaps, 2),
             "total_phenotypes": positive + negative,
+            "zero_gap_count": zero_gap,
+            "max_gap_count": max_gaps,
+            "top_gapfilled": top_gapfilled,
         }
         print(f"  {positive} positive growth phenotypes")
         print(f"  {negative} negative growth phenotypes")
+        print(f"  {zero_gap} phenotypes with zero gaps, max {max_gaps} gaps")
     else:
         summary["growth_phenotypes"] = None
         print("  genome_phenotype table not found")

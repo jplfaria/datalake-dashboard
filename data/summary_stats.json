@@ -151,7 +151,51 @@
     "negative_growth": 146,
     "avg_positive_gaps": 0,
     "avg_negative_gaps": 1.69,
-    "total_phenotypes": 212
+    "total_phenotypes": 212,
+    "zero_gap_count": 66,
+    "max_gap_count": 7,
+    "top_gapfilled": [
+      {
+        "reactions": "rxn05939_c0",
+        "frequency": 62
+      },
+      {
+        "reactions": "rxn13648_c0",
+        "frequency": 2
+      },
+      {
+        "reactions": "rxn13496_c0;rxn12561_c0;rxn13422_c0",
+        "frequency": 1
+      },
+      {
+        "reactions": "rxn13171_c0;rxn01927_c0;rxn13182_c0;rxn01437_c0;rxn00478_c0;rxn20627_c0",
+        "frequency": 1
+      },
+      {
+        "reactions": "rxn12983_c0;rxn11137_c0",
+        "frequency": 1
+      },
+      {
+        "reactions": "rxn12625_c0",
+        "frequency": 1
+      },
+      {
+        "reactions": "rxn12612_c0",
+        "frequency": 1
+      },
+      {
+        "reactions": "rxn12608_c0",
+        "frequency": 1
+      },
+      {
+        "reactions": "rxn12606_c0",
+        "frequency": 1
+      },
+      {
+        "reactions": "rxn12600_c0",
+        "frequency": 1
+      }
+    ]
   },
   "comparison": {
     "n_reference_genomes": 52,

@@ -2,9 +2,10 @@
 """Generate phenotype data for integration into genes_data.json.
 
 Extracts phenotype statistics from the gene_phenotype table and adds
-two new fields to each gene:
+three new fields to each gene:
 - N_PHENOTYPES (index 36): Number of distinct phenotypes linked to this gene
-- N_FITNESS (index 37): Number of phenotype associations with fitness_match='yes'
+- N_FITNESS (index 37): Number of phenotype associations with fitness scores
+- FITNESS_AVG (index 38): Average fitness score across all scored phenotypes (-1 if none)
 
 Usage:
     python3 generate_phenotypes_data.py DB_PATH GENES_DATA_PATH
@@ -46,27 +47,33 @@ def main():
 
     print(f"  Loaded {len(genes_data)} genes with {len(genes_data[0])} fields each")
 
-    # Count phenotypes per gene
+    # Count phenotypes and fitness scores per gene
     print("Counting phenotypes and fitness scores per gene...")
 
     phenotype_counts = defaultdict(set)
     fitness_counts = defaultdict(int)
+    fitness_avg_sum = defaultdict(float)
+    fitness_avg_count = defaultdict(int)
 
     for row in conn.execute("""
-        SELECT gene_id, phenotype_id, fitness_match
+        SELECT gene_id, phenotype_id, fitness_match, fitness_avg
         FROM gene_phenotype
         WHERE genome_id = ?
     """, (user_genome_id,)):
         gene_id = row["gene_id"]
         phenotype_counts[gene_id].add(row["phenotype_id"])
-        if row["fitness_match"] and row["fitness_match"].lower() == "yes":
+        if row["fitness_match"] == "has_score":
             fitness_counts[gene_id] += 1
+            if row["fitness_avg"] is not None:
+                fitness_avg_sum[gene_id] += row["fitness_avg"]
+                fitness_avg_count[gene_id] += 1
 
     conn.close()
 
     print(f"  Found phenotype data for {len(phenotype_counts)} genes")
+    print(f"  Found fitness scores for {len(fitness_counts)} genes")
 
-    # Add two new fields to each gene
+    # Add three new fields to each gene
     genes_with_phenotypes = 0
     genes_with_fitness = 0
 
@@ -75,8 +82,14 @@ def main():
         n_phenotypes = len(phenotype_counts.get(gene_id, set()))
         n_fitness = fitness_counts.get(gene_id, 0)
 
-        gene.append(n_phenotypes)
-        gene.append(n_fitness)
+        if fitness_avg_count.get(gene_id, 0) > 0:
+            avg_fitness = round(fitness_avg_sum[gene_id] / fitness_avg_count[gene_id], 4)
+        else:
+            avg_fitness = -1  # N/A sentinel
+
+        gene.append(n_phenotypes)   # [36] N_PHENOTYPES
+        gene.append(n_fitness)      # [37] N_FITNESS
+        gene.append(avg_fitness)    # [38] FITNESS_AVG
 
         if n_phenotypes > 0:
             genes_with_phenotypes += 1

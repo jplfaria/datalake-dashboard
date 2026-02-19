@@ -127,12 +127,19 @@ def main():
     metadata = {}
     for gid in genome_ids:
         gdata = genome_table.get(gid, {})
-        metadata[gid] = {
+        meta = {
             "taxonomy": gdata.get("gtdb_taxonomy") or gdata.get("ncbi_taxonomy") or "Unknown",
             "n_features": gdata.get("size", 0),
             "n_contigs": gdata.get("n_contigs", 0),
             "ani_to_user": ani_data.get(gid) if gid != user_genome_id else 1.0,
         }
+        if "kind" in gdata:
+            meta["kind"] = gdata["kind"]
+        if "checkm_completeness" in gdata and gdata["checkm_completeness"] is not None:
+            meta["checkm_completeness"] = round(gdata["checkm_completeness"], 2)
+        if "checkm_contamination" in gdata and gdata["checkm_contamination"] is not None:
+            meta["checkm_contamination"] = round(gdata["checkm_contamination"], 2)
+        metadata[gid] = meta
 
     # Per-genome stats
     print("Computing per-genome stats...")
