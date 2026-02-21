@@ -3093,7 +3093,7 @@
         const leafH = 24;
         const marginTop = 20;
         const marginBottom = 40;
-        const labelWidth = 200;
+        const labelWidth = 280;
         const treeWidth = 400;
         const enabledStats = TREE_STATS.filter(s => s.enabled);
         const statBarWidth = enabledStats.length > 0 ? 60 * enabledStats.length : 0;
@@ -3211,18 +3211,32 @@
         });
 
         // Draw leaves
+        // Pre-compute species name counts to detect duplicates
+        const speciesCount = {};
+        leafOrder.forEach(gid => {
+            const tax = (d.genome_metadata[gid] || {}).tax || {};
+            const sp = tax.species || '';
+            if (sp) speciesCount[sp] = (speciesCount[sp] || 0) + 1;
+        });
+
         leafOrder.forEach((gid, pos) => {
             const y = marginTop + pos * leafH + leafH / 2;
             const isUser = gid === d.user_genome_id;
             const meta = d.genome_metadata[gid] || {};
             const stats = d.genome_stats[gid] || {};
             const tax = meta.tax || {};
-            const shortId = gid.replace('RS_GCF_', 'GCF_').replace(/\.1$/, '');
-            const displayName = tax.species || (isUser && METADATA && METADATA.organism ? METADATA.organism : shortId);
-            // Truncate user genome label to fit better
+            const shortId = gid.replace(/^[A-Z]{2}_[A-Z]{3}_/, '').replace(/\.\d+$/, '');
+            const species = tax.species || (isUser && METADATA && METADATA.organism ? METADATA.organism : '');
+            // When multiple genomes share the same species, append accession to distinguish
+            let displayName;
+            if (species && !isUser && speciesCount[species] > 1) {
+                displayName = `${species} (${shortId})`;
+            } else {
+                displayName = species || shortId;
+            }
             let label = isUser ? `${displayName} (YOUR GENOME)` : displayName;
-            if (isUser && label.length > 35) {
-                label = label.substring(0, 32) + '...';
+            if (label.length > 45) {
+                label = label.substring(0, 42) + '...';
             }
             const textColor = isUser ? '#dc2626' : '#374151';
             const fontWeight = isUser ? '700' : '400';
@@ -3321,15 +3335,22 @@
                 const kindLabel = meta.kind ? `<span style="color:#9D9389; font-size:10px; margin-left:6px;">[${meta.kind}]</span>` : '';
                 const checkmHtml = meta.checkm_completeness != null ?
                     `<div><span style="color:#9D9389;">CheckM:</span> <span style="color:#22c55e;">${meta.checkm_completeness.toFixed(1)}%</span> complete, <span style="color:${meta.checkm_contamination > 5 ? '#ef4444' : '#9D9389'}">${meta.checkm_contamination.toFixed(1)}%</span> contamination</div>` : '';
+                const gtdbTax = meta.gtdb_tax || {};
+                const isUser = gid === treeData.user_genome_id;
+                const accession = gid.replace(/^GB_/, '').replace(/^RS_/, '');
+                const ncbiLink = !isUser ? `<div style="margin-top:6px; border-top:1px solid rgba(255,255,255,0.1); padding-top:6px;"><a href="https://www.ncbi.nlm.nih.gov/datasets/genome/${accession}/" target="_blank" style="color:#66B1DB; font-size:11px; text-decoration:none;">View on NCBI ↗</a></div>` : '';
                 tooltip.innerHTML = `
                     <div style="font-weight:700; color:#66B1DB; margin-bottom:4px;">${gid}${kindLabel}</div>
-                    <div>${tax.species || 'Unknown species'}</div>
-                    <div style="color:#9D9389; font-size:10px;">${[tax.phylum, tax.class, tax.order, tax.family, tax.genus].filter(Boolean).join(' > ')}</div>
-                    <div style="margin-top:6px;"><span style="color:#9D9389;">Features:</span> ${meta.n_features || '?'} | <span style="color:#9D9389;">Contigs:</span> ${meta.n_contigs || '?'}</div>
+                    <div><span style="color:#9D9389; font-size:10px;">NCBI:</span> ${tax.species || 'Not classified'}</div>
+                    <div style="color:#9D9389; font-size:10px;">${[tax.phylum, tax.class, tax.order, tax.family, tax.genus].filter(Boolean).join(' > ') || ''}</div>
+                    <div style="margin-top:2px;"><span style="color:#9D9389; font-size:10px;">GTDB:</span> ${gtdbTax.species || 'Not classified'}</div>
+                    <div style="color:#9D9389; font-size:10px;">${[gtdbTax.phylum, gtdbTax.class, gtdbTax.order, gtdbTax.family, gtdbTax.genus].filter(Boolean).join(' > ') || ''}</div>
+                    <div style="margin-top:6px;"><span style="color:#9D9389;">Features:</span> ${meta.n_features || '?'} | <span style="color:#9D9389;">Contigs:</span> ${stats.n_contigs || '?'}</div>
                     <div><span style="color:#9D9389;">Genes:</span> ${stats.n_genes || '?'} | <span style="color:#9D9389;">Clusters:</span> ${stats.n_clusters || '?'} | <span style="color:#9D9389;">Core:</span> ${stats.core_pct != null ? (stats.core_pct * 100).toFixed(1) + '%' : '?'}</div>
                     <div><span style="color:#9D9389;">ANI to user:</span> ${ani}</div>
                     ${checkmHtml}
                     ${phenoHtml}
+                    ${ncbiLink}
                 `;
                 tooltip.style.display = 'block';
                 const rect = leaf.getBoundingClientRect();
@@ -4225,6 +4246,21 @@
     }
 
     function renderHistogram(track, values, naCount, container) {
+        if (values.length === 0) {
+            container.innerHTML = `
+                <div class="dist-chart-container">
+                    <div class="dist-chart-title">${track.name} Distribution</div>
+                    <div class="dist-stats">
+                        <div class="dist-stat-card">
+                            <div class="dist-stat-label">Total Genes</div>
+                            <div class="dist-stat-value">0</div>
+                        </div>
+                        ${naCount ? `<div class="dist-stat-card" style="border-left-color: var(--kb-base-light);"><div class="dist-stat-label">N/A</div><div class="dist-stat-value">${naCount.count.toLocaleString()}</div></div>` : ''}
+                    </div>
+                    <div style="color:#9D9389; padding:40px 20px; text-align:center;">No data available for this track</div>
+                </div>`;
+            return;
+        }
         const total = genes.length;
         const nBins = Math.min(20, Math.max(10, Math.ceil(Math.sqrt(values.length))));
 
@@ -5090,6 +5126,7 @@
 
         el.innerHTML = `
             <div class="rxn-id">${rxnId}</div>
+            <div style="margin-top:2px;"><a href="https://modelseed.org/biochem/reactions/${baseId}" target="_blank" style="color:#66B1DB; font-size:11px; text-decoration:none;">View on ModelSEED ↗</a></div>
             <div class="rxn-eq">${rxn.equation || 'No equation'}</div>
             <div class="rxn-row"><span class="rxn-label">Directionality</span><span class="rxn-val">${rxn.directionality}</span></div>
             <div class="rxn-row"><span class="rxn-label">Conservation</span><span class="rxn-val">${(rxn.conservation * 100).toFixed(0)}% (${Math.round(rxn.conservation * reactionsData.n_genomes)}/${reactionsData.n_genomes})</span></div>

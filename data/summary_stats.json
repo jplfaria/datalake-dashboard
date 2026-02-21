@@ -1,201 +1,22 @@
 {
-  "missing_functions": {
-    "pangenome_missing": 0,
-    "gapfilled": 36,
-    "total_reactions": 1840,
-    "top_missing": [
-      {
-        "reaction": "rxn00062",
-        "function": "H2O [c0] + ATP [c0] --> ADP [c0] + Phosphate [c0] + H+ [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn00064",
-        "function": "H2O [c0] + ATP [c0] + H+ [c0] --> NH3 [c0] + ITP [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn00599",
-        "function": "Glycine [c0] + H+ [c0] + Succinyl-CoA [c0] --> CoA [c0] + CO2 [c0] + 5-Aminolevulinate [c0]",
-        "pangenome": false,
-        "rich_gapfill": true,
-        "min_gapfill": false
-      },
-      {
-        "reaction": "rxn01208",
-        "function": "CO2 [c0] + 4MOP [c0] <-- H+ [c0] + 2-isopropyl-3-oxosuccinate [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn02185",
-        "function": "TPP [c0] + ALCTT [c0] <-- Pyruvate [c0] + 2-Hydroxyethyl-ThPP [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn02374",
-        "function": "L-Glutamate5-semialdehyde [c0] --> H2O [c0] + H+ [c0] + 1-Pyrroline-5-carboxylate [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn02916",
-        "function": "2-Oxo-6-aminocaproate [c0] --> H2O [c0] + H+ [c0] + delta1-Piperideine-2-carboxylate [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn02989",
-        "function": "H2O [c0] + Quinolinate [c0] <-- 2-Amino-3-carboxymuconate semialdehyde [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn03012",
-        "function": "L-2-Amino-6-oxopimelate [c0] --> H2O [c0] + H+ [c0] + tetrahydrodipicolinate [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn04132",
-        "function": "H2O [c0] + 5-Hydroxyisourate [c0] --> CO2 [c0] + H+ [c0] + (R)-Allantoin [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn04133",
-        "function": "H2O [c0] + 5-Hydroxyisourate [c0] --> CO2 [c0] + H+ [c0] + Allantoin [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn04457",
-        "function": "5-Hydroxy-2-oxo-4-ureido-2,5-dihydro-1H-imidazole-5-carboxylate [c0] --> CO2 [c0] + (R)-Allantoin [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn04791",
-        "function": "GSH [c0] + Formaldehyde [c0] <=> S-(Hydroxymethyl)glutathione [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn05129",
-        "function": "Phosphocreatine [c0] --> Phosphate [c0] + Creatinine [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn05195",
-        "function": "H2O [c0] + ATP [c0] + fe3 [e0] --> ADP [c0] + Phosphate [c0] + H+ [c0] + fe3 [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn05459",
-        "function": "CoA [c0] + H+ [c0] + Octodecanoyl-ACP [c0] --> strcoa [c0] + ACP [c0]",
-        "pangenome": false,
-        "rich_gapfill": true,
-        "min_gapfill": false
-      },
-      {
-        "reaction": "rxn05467",
-        "function": "CO2 [e0] <=> CO2 [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn05468",
-        "function": "O2 [e0] --> O2 [c0]",
-        "pangenome": false,
-        "rich_gapfill": true,
-        "min_gapfill": false
-      },
-      {
-        "reaction": "rxn05481",
-        "function": "H+ [e0] + 5-Methylthio-D-ribose [e0] <-- H+ [c0] + 5-Methylthio-D-ribose [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      },
-      {
-        "reaction": "rxn05730",
-        "function": "H+ [e0] + Tetrathionate [e0] <=> H+ [c0] + Tetrathionate [c0]",
-        "pangenome": false,
-        "rich_gapfill": false,
-        "min_gapfill": true
-      }
-    ]
+  "gene_categories": {
+    "total_genes": 4355,
+    "core_genes": 3434,
+    "accessory_genes": 436,
+    "unknown_genes": 485
   },
   "growth_phenotypes": {
     "positive_growth": 66,
     "negative_growth": 146,
-    "avg_positive_gaps": 0,
-    "avg_negative_gaps": 1.69,
-    "total_phenotypes": 212,
-    "zero_gap_count": 66,
-    "max_gap_count": 7,
-    "top_gapfilled": [
-      {
-        "reactions": "rxn05939_c0",
-        "frequency": 62
-      },
-      {
-        "reactions": "rxn13648_c0",
-        "frequency": 2
-      },
-      {
-        "reactions": "rxn13496_c0;rxn12561_c0;rxn13422_c0",
-        "frequency": 1
-      },
-      {
-        "reactions": "rxn13171_c0;rxn01927_c0;rxn13182_c0;rxn01437_c0;rxn00478_c0;rxn20627_c0",
-        "frequency": 1
-      },
-      {
-        "reactions": "rxn12983_c0;rxn11137_c0",
-        "frequency": 1
-      },
-      {
-        "reactions": "rxn12625_c0",
-        "frequency": 1
-      },
-      {
-        "reactions": "rxn12612_c0",
-        "frequency": 1
-      },
-      {
-        "reactions": "rxn12608_c0",
-        "frequency": 1
-      },
-      {
-        "reactions": "rxn12606_c0",
-        "frequency": 1
-      },
-      {
-        "reactions": "rxn12600_c0",
-        "frequency": 1
-      }
-    ]
+    "total_phenotypes": 212
+  },
+  "comparison": {
+    "n_reference_genomes": 52,
+    "closest_ani": 99.99
+  },
+  "reactions": {
+    "total_reactions": 1841,
+    "gapfilled_reactions": 36
   },
   "phenotype_landscape": {
     "genomes": [
@@ -668,19 +489,18 @@
         "accuracy": null
       },
       {
-        "id": "user_GCF_000005845.2.RAST",
+        "id": "user_Escherichia_coli_str._K-12_substr._MG1655",
         "positive": 66,
         "negative": 146,
         "total": 212,
-        "avg_gaps": 1.17,
+        "avg_gaps": 1.16,
         "no_gap_pct": 0.3113,
-        "accuracy": 0.7414,
-        "closest_experimental": "202950_11",
-        "jaccard_similarity": 0.7917
+        "accuracy": null,
+        "closest_experimental": "Keio",
+        "jaccard_similarity": 1.0
       }
     ],
-    "user_genome_id": "user_GCF_000005845.2.RAST",
-    "has_accuracy": true,
+    "user_genome_id": "user_Escherichia_coli_str._K-12_substr._MG1655",
     "reference_accuracies": [
       {
         "id": "106654_22",
@@ -2586,10 +2406,7 @@
         "id": "Variovorax_sp__CF313_2513020051",
         "accuracy": 0.625
       }
-    ]
-  },
-  "comparison": {
-    "n_reference_genomes": 52,
-    "closest_ani": 99.99
+    ],
+    "has_accuracy": true
   }
 }

@@ -15,7 +15,7 @@ import sys
 
 def derive_organism_name(genome_id, gtdb_taxonomy, ncbi_taxonomy):
     """Derive a human-readable organism name from available metadata."""
-    for taxonomy in [gtdb_taxonomy, ncbi_taxonomy]:
+    for taxonomy in [ncbi_taxonomy, gtdb_taxonomy]:
         if taxonomy and taxonomy.strip():
             parts = taxonomy.split(";")
             for part in reversed(parts):

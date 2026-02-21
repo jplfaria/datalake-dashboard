@@ -118,6 +118,38 @@ def main():
                 matrix[gi, cluster_to_idx[cid]] = 1
 
     # Jaccard distances + UPGMA
+    if n_genomes < 2:
+        print("  WARNING: Less than 2 genomes, generating minimal tree data")
+        metadata = {}
+        for gid in genome_ids:
+            gdata = genome_table.get(gid, {})
+            ncbi_raw = gdata.get("ncbi_taxonomy") or ""
+            gtdb_raw = gdata.get("gtdb_taxonomy") or ""
+            meta = {
+                "taxonomy": ncbi_raw or gtdb_raw or "Unknown",
+                "tax": parse_taxonomy(ncbi_raw),
+                "gtdb_tax": parse_taxonomy(gtdb_raw),
+                "n_features": gdata.get("size", 0),
+                "ani_to_user": 1.0,
+            }
+            if "kind" in gdata:
+                meta["kind"] = gdata["kind"]
+            metadata[gid] = meta
+        output = {
+            "linkage": [],
+            "genome_ids": genome_ids,
+            "leaf_order": genome_ids,
+            "user_genome_id": user_genome_id,
+            "genome_metadata": metadata,
+            "genome_stats": {},
+            "stats": {"n_genomes": n_genomes, "n_clusters": n_clusters, "n_reference": 0, "max_distance": 0, "min_distance": 0},
+        }
+        with open(output_path, "w") as f:
+            json.dump(output, f, separators=(",", ":"))
+        print(f"Wrote minimal {output_path}")
+        conn.close()
+        return
+
     print("Computing Jaccard distance matrix...")
     condensed = pdist(matrix, metric="jaccard")
     print(f"  Distance range: {condensed.min():.4f} - {condensed.max():.4f}")
@@ -168,10 +200,12 @@ def main():
     metadata = {}
     for gid in genome_ids:
         gdata = genome_table.get(gid, {})
-        raw_tax = gdata.get("gtdb_taxonomy") or gdata.get("ncbi_taxonomy") or "Unknown"
+        ncbi_raw = gdata.get("ncbi_taxonomy") or ""
+        gtdb_raw = gdata.get("gtdb_taxonomy") or ""
         meta = {
-            "taxonomy": raw_tax,
-            "tax": parse_taxonomy(raw_tax),
+            "taxonomy": ncbi_raw or gtdb_raw or "Unknown",
+            "tax": parse_taxonomy(ncbi_raw),
+            "gtdb_tax": parse_taxonomy(gtdb_raw),
             "n_features": gdata.get("size", 0),
             "ani_to_user": ani_data.get(gid) if gid != user_genome_id else 1.0,
         }
