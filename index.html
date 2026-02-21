@@ -4530,7 +4530,7 @@
             // Wire click events on reactions
             setupMetabolicClickEvents();
             // Intercept Escher's BiGG links and redirect to ModelSEED
-            setupModelSeedLinkOverride(container);
+            setupModelSeedLinkOverride();
         } catch (e) {
             console.error('Escher Builder error:', e);
             container.innerHTML = '<div class="metabolic-loading">Error initializing Escher map. See console.</div>';
@@ -5101,10 +5101,11 @@
         }, 500);
     }
 
-    function setupModelSeedLinkOverride(container) {
-        // Escher's built-in tooltips link to bigg.ucsd.edu but our IDs are ModelSEED
-        // Intercept clicks on BiGG links and redirect to ModelSEED
-        container.addEventListener('click', (e) => {
+    function setupModelSeedLinkOverride() {
+        // Escher's built-in tooltips link to bigg.ucsd.edu but our IDs are ModelSEED.
+        // The tooltip may be placed anywhere in the DOM (not just inside our container),
+        // so we intercept at document level using the capturing phase.
+        document.addEventListener('click', (e) => {
             const link = e.target.closest('a[href*="bigg.ucsd.edu"]');
             if (!link) return;
             e.preventDefault();
