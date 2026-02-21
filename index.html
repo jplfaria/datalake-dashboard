@@ -4529,6 +4529,8 @@
             });
             // Wire click events on reactions
             setupMetabolicClickEvents();
+            // Intercept Escher's BiGG links and redirect to ModelSEED
+            setupModelSeedLinkOverride(container);
         } catch (e) {
             console.error('Escher Builder error:', e);
             container.innerHTML = '<div class="metabolic-loading">Error initializing Escher map. See console.</div>';
@@ -5097,6 +5099,30 @@
                 if (rxnId) showReactionDetail(rxnId);
             });
         }, 500);
+    }
+
+    function setupModelSeedLinkOverride(container) {
+        // Escher's built-in tooltips link to bigg.ucsd.edu but our IDs are ModelSEED
+        // Intercept clicks on BiGG links and redirect to ModelSEED
+        container.addEventListener('click', (e) => {
+            const link = e.target.closest('a[href*="bigg.ucsd.edu"]');
+            if (!link) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const href = link.href;
+            // Extract the ID from BiGG URL patterns:
+            // http://bigg.ucsd.edu/universal/reactions/rxn00154_c0
+            // http://bigg.ucsd.edu/universal/metabolites/cpd00029
+            const rxnMatch = href.match(/reactions\/(\w+)/);
+            const metMatch = href.match(/metabolites\/(\w+)/);
+            if (rxnMatch) {
+                const baseId = rxnMatch[1].replace(/_[cepxm]\d+$/, '');
+                window.open(`https://modelseed.org/biochem/reactions/${baseId}`, '_blank');
+            } else if (metMatch) {
+                const baseId = metMatch[1].replace(/_[cepxm]\d+$/, '');
+                window.open(`https://modelseed.org/biochem/compounds/${baseId}`, '_blank');
+            }
+        }, true);
     }
 
     function showReactionDetail(rxnId) {
