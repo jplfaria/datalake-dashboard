@@ -3225,7 +3225,7 @@
             const meta = d.genome_metadata[gid] || {};
             const stats = d.genome_stats[gid] || {};
             const tax = meta.tax || {};
-            const shortId = gid.replace(/^[A-Z]{2}_[A-Z]{3}_/, '').replace(/\.\d+$/, '');
+            const shortId = gid.replace(/^(GB|RS)_/, '');
             const species = tax.species || (isUser && METADATA && METADATA.organism ? METADATA.organism : '');
             // When multiple genomes share the same species, append accession to distinguish
             let displayName;
@@ -3235,7 +3235,7 @@
                 displayName = species || shortId;
             }
             let label = isUser ? `${displayName} (YOUR GENOME)` : displayName;
-            if (label.length > 45) {
+            if (label.length > 50) {
                 label = label.substring(0, 42) + '...';
             }
             const textColor = isUser ? '#dc2626' : '#374151';
