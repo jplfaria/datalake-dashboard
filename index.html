@@ -503,7 +503,7 @@
         .tree-tooltip {
             position: fixed; background: var(--kb-base-darker); color: white;
             padding: 10px 14px; border-radius: 6px; font-size: 11px;
-            pointer-events: none; z-index: 1000; max-width: 350px;
+            pointer-events: auto; z-index: 1000; max-width: 350px;
             display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); line-height: 1.5;
         }
         .stat-toggle { display: flex; align-items: center; gap: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
@@ -836,6 +836,15 @@
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-title" >
+                    <span>Reaction Detail</span>
+                    <span class="toggle-icon">&#9660;</span>
+                </div>
+                <div class="rxn-detail" id="metabolic-rxn-detail">
+                    <span style="color:#9D9389;">Click a reaction on the map to see details</span>
+                </div>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title" >
                     <span>Stats</span>
                     <span class="toggle-icon">&#9660;</span>
                 </div>
@@ -868,15 +877,6 @@
                 </div>
                 <div style="padding: 8px 12px; font-size: 10px; color: var(--kb-base); line-height: 1.4; max-height: 200px; overflow-y: auto;" id="metabolic-unmapped">
                     Loading...
-                </div>
-            </div>
-            <div class="sidebar-section">
-                <div class="sidebar-section-title" >
-                    <span>Reaction Detail</span>
-                    <span class="toggle-icon">&#9660;</span>
-                </div>
-                <div class="rxn-detail" id="metabolic-rxn-detail">
-                    <span style="color:#9D9389;">Click a reaction on the map to see details</span>
                 </div>
             </div>
         </div>
@@ -3318,10 +3318,22 @@
         svg += '</svg>';
         container.innerHTML = svg;
 
-        // Tooltips on leaf hover
+        // Tooltips on leaf hover - interactive (allows clicking links)
         const tooltip = document.getElementById('tree-tooltip');
+        let treeTooltipTimer = null;
+        const hideTooltipDelayed = () => {
+            treeTooltipTimer = setTimeout(() => { tooltip.style.display = 'none'; }, 300);
+        };
+        const cancelTooltipHide = () => {
+            if (treeTooltipTimer) { clearTimeout(treeTooltipTimer); treeTooltipTimer = null; }
+        };
+        // Keep tooltip visible when hovering over it (so links are clickable)
+        tooltip.addEventListener('mouseenter', cancelTooltipHide);
+        tooltip.addEventListener('mouseleave', hideTooltipDelayed);
+
         container.querySelectorAll('.tree-leaf').forEach(leaf => {
             leaf.addEventListener('mouseenter', (e) => {
+                cancelTooltipHide();
                 const gid = leaf.dataset.gid;
                 const meta = treeData.genome_metadata[gid] || {};
                 const stats = treeData.genome_stats[gid] || {};
@@ -3357,7 +3369,7 @@
                 tooltip.style.left = (rect.right + 10) + 'px';
                 tooltip.style.top = Math.max(10, rect.top - 30) + 'px';
             });
-            leaf.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+            leaf.addEventListener('mouseleave', hideTooltipDelayed);
         });
 
         // Tooltips on stat bar hover
@@ -5103,25 +5115,38 @@
 
     function setupModelSeedLinkOverride() {
         // Escher's built-in tooltips link to bigg.ucsd.edu but our IDs are ModelSEED.
-        // The tooltip may be placed anywhere in the DOM (not just inside our container),
-        // so we intercept at document level using the capturing phase.
+        // Escher uses window.open() directly (not <a> tags), so we override window.open
+        // to intercept BiGG URLs and redirect to ModelSEED.
+        const origWindowOpen = window.open;
+        window.open = function(url, ...args) {
+            if (url && typeof url === 'string' && url.includes('bigg.ucsd.edu')) {
+                const rxnMatch = url.match(/reactions\/(\w+)/);
+                const metMatch = url.match(/metabolites\/(\w+)/);
+                if (rxnMatch) {
+                    const baseId = rxnMatch[1].replace(/_[cepxm]\d+$/, '');
+                    return origWindowOpen.call(this, `https://modelseed.org/biochem/reactions/${baseId}`, ...args);
+                } else if (metMatch) {
+                    const baseId = metMatch[1].replace(/_[cepxm]\d+$/, '');
+                    return origWindowOpen.call(this, `https://modelseed.org/biochem/compounds/${baseId}`, ...args);
+                }
+            }
+            return origWindowOpen.call(this, url, ...args);
+        };
+        // Also intercept <a> tag clicks as fallback
         document.addEventListener('click', (e) => {
             const link = e.target.closest('a[href*="bigg.ucsd.edu"]');
             if (!link) return;
             e.preventDefault();
             e.stopPropagation();
             const href = link.href;
-            // Extract the ID from BiGG URL patterns:
-            // http://bigg.ucsd.edu/universal/reactions/rxn00154_c0
-            // http://bigg.ucsd.edu/universal/metabolites/cpd00029
             const rxnMatch = href.match(/reactions\/(\w+)/);
             const metMatch = href.match(/metabolites\/(\w+)/);
             if (rxnMatch) {
                 const baseId = rxnMatch[1].replace(/_[cepxm]\d+$/, '');
-                window.open(`https://modelseed.org/biochem/reactions/${baseId}`, '_blank');
+                origWindowOpen.call(window, `https://modelseed.org/biochem/reactions/${baseId}`, '_blank');
             } else if (metMatch) {
                 const baseId = metMatch[1].replace(/_[cepxm]\d+$/, '');
-                window.open(`https://modelseed.org/biochem/compounds/${baseId}`, '_blank');
+                origWindowOpen.call(window, `https://modelseed.org/biochem/compounds/${baseId}`, '_blank');
             }
         }, true);
     }
